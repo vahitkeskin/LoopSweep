@@ -109,11 +109,20 @@ object VacuumClient {
             // Diagnostic findings:
             //   siid:2, aiid:6, in:[]     → clean ALL areas (Tüm ev)
             //   siid:12, aiid:1, in:[id]  → select specific map/area and start cleaning
+            //   siid:7, aiid:3, in:[id, mode, oper] -> clean specific room (e.g. 16 to 21)
             val jsonPayload: String
             if (roomId == 0L) {
                 // 0 = Tüm ev / all areas — use general start sweep
                 jsonPayload = "{\"id\":1,\"method\":\"action\",\"params\":{\"did\":\"$didStr\",\"siid\":2,\"aiid\":6,\"in\":[]}}"
                 Logger.i("VacuumClient", "Komut: Tüm ev temizliği (siid=2, aiid=6)")
+            } else if (roomId in 1L..99L) {
+                // Specific individual room ID (e.g. 16L = Salon).
+                // Use Service 7, Action 3 (set-room-clean) with:
+                //   clean-room-ids = "$roomId"
+                //   clean-room-mode = 0 (Global)
+                //   clean-room-oper = 1 (Start)
+                jsonPayload = "{\"id\":1,\"method\":\"action\",\"params\":{\"did\":\"$didStr\",\"siid\":7,\"aiid\":3,\"in\":[\"$roomId\",0,1]}}"
+                Logger.i("VacuumClient", "Komut: Bölgesel oda temizliği (siid=7, aiid=3, room=$roomId)")
             } else {
                 // Specific map/area ID (e.g., 1779096923 = Balkon)
                 // siid:12, aiid:1 = select map + start cleaning — confirmed code:0 in diagnostics
@@ -446,7 +455,7 @@ object VacuumClient {
             // The device returns a nested escaped JSON string inside the 'value' field.
             // Example raw: {"result":{"out":[{"piid":4,"value":"[{\"name\":\"Tüm ev\",\"id\":1763994619,...}]"}]}}
             // Strategy 1: Extract the value string content first, then parse name+id pairs.
-            val valuePattern = "\\\"value\\\":\\\"(.*?)\\\"".toRegex(RegexOption.DOT_MATCHES_ALL)
+            val valuePattern = """\"value\"\s*:\s*\"(\[.*?\])\"""".toRegex()
             val valueMatch = valuePattern.find(json)
             val searchTarget = if (valueMatch != null) {
                 // Unescape the inner JSON string so we can parse it cleanly

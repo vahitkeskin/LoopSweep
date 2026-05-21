@@ -201,7 +201,7 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
             )
 
             // Draw Radar Sweep Line
-            val rad = Math.toRadians(rotationAngle.toDouble())
+            val rad = rotationAngle.toDouble() * kotlin.math.PI / 180.0
             val lineEnd = Offset(
                 center.x + maxRadius * cos(rad).toFloat(),
                 center.y + maxRadius * sin(rad).toFloat()

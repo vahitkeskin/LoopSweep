@@ -159,28 +159,47 @@ class VacuumViewModel(
                     )
                     // Icons indexed: first entry is always "Tüm ev" (all home)
                     val roomIcons = listOf("🏠", "🛋️", "🛏️", "🍳", "🛁", "🧹", "💻", "🪴", "🚿")
-                    val mappedRooms = pairs.mapIndexed { index, (id, name) ->
-                        // "Tüm ev" = whole home map (cur:true). This needs the all-areas command.
-                        // Detect by name OR by being the first/primary map.
+                    val mappedRooms = mutableListOf<RoomItem>()
+                    // 1. Add maps returned from the device (Tüm ev, Balkon)
+                    pairs.forEachIndexed { index, (id, name) ->
                         val isAllHome = name.contains("tüm ev", ignoreCase = true) ||
-                                        name.contains("all home", ignoreCase = true) ||
-                                        name.contains("tüm", ignoreCase = true) && name.contains("ev", ignoreCase = true)
-                        RoomItem(
-                            id = id,
-                            name = name,
-                            icon = roomIcons.getOrElse(index) { "🏠" },
-                            gradientColors = roomColors.getOrElse(index) {
-                                listOf(Color(0xFF6366F1), Color(0xFF4F46E5))
-                            },
-                            isAllAreas = isAllHome
+                                         name.contains("all home", ignoreCase = true) ||
+                                         name.contains("tüm", ignoreCase = true) && name.contains("ev", ignoreCase = true)
+                        mappedRooms.add(
+                            RoomItem(
+                                id = id,
+                                name = name,
+                                icon = roomIcons.getOrElse(index) { "🏠" },
+                                gradientColors = roomColors.getOrElse(index) {
+                                    listOf(Color(0xFF6366F1), Color(0xFF4F46E5))
+                                },
+                                isAllAreas = isAllHome
+                            )
                         )
                     }
+
+                    // 2. Add individual default rooms if there's a map list returned
+                    Constants.DEFAULT_ROOMS.forEachIndexed { index, defaultRoom ->
+                        val colorIdx = (pairs.size + index) % roomColors.size
+                        mappedRooms.add(
+                            RoomItem(
+                                id = defaultRoom.id,
+                                name = defaultRoom.name,
+                                icon = defaultRoom.icon,
+                                gradientColors = roomColors.getOrElse(colorIdx) {
+                                    listOf(Color(0xFF6366F1), Color(0xFF4F46E5))
+                                },
+                                isAllAreas = false
+                            )
+                        )
+                    }
+
                     _rooms.value = mappedRooms
                     roomsFetched = true
                     val allLabel = mappedRooms.filter { it.isAllAreas }.joinToString { it.name }
                     val areaLabel = mappedRooms.filter { !it.isAllAreas }.joinToString { it.name }
-                    addLog("Oda haritası çekildi: ${pairs.size} bölge. Tüm ev: [$allLabel] | Alanlar: [$areaLabel]")
-                    Logger.i("VacuumViewModel", "Rooms fetched: ${mappedRooms.map { "${it.name} (id=${it.id}, allAreas=${it.isAllAreas})" }}")
+                    addLog("Oda haritası çekildi: ${pairs.size} harita bölgesi ve ${Constants.DEFAULT_ROOMS.size} oda yüklendi.")
+                    Logger.i("VacuumViewModel", "Rooms merged: ${mappedRooms.map { "${it.name} (id=${it.id}, allAreas=${it.isAllAreas})" }}")
                 } else {
                     Logger.i("VacuumViewModel", "get_map returned empty room list. Using default rooms.")
                 }
