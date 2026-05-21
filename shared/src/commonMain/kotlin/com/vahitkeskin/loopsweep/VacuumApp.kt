@@ -13,7 +13,10 @@ fun VacuumApp() {
     
     // 2. Resolve our ViewModel with UseCase injection
     val viewModel = remember { 
-        VacuumViewModel(appContainer.cleanRoomUseCase)
+        VacuumViewModel(
+            cleanRoomUseCase = appContainer.cleanRoomUseCase,
+            getVacuumPropertiesUseCase = appContainer.getVacuumPropertiesUseCase
+        )
     }
     
     // 3. Render the Main Screen

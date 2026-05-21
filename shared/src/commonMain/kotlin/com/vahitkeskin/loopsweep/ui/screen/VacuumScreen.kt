@@ -27,6 +27,9 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
     val tokenState by viewModel.token.collectAsState()
     val isLoadingState by viewModel.isLoading.collectAsState()
     val statusMsgState by viewModel.statusMessage.collectAsState()
+    val batteryLevelState by viewModel.batteryLevel.collectAsState()
+    val deviceStatusState by viewModel.deviceStatusText.collectAsState()
+    val isChargingState by viewModel.isCharging.collectAsState()
     
     val rooms = remember { Constants.DEFAULT_ROOMS }
     
@@ -80,6 +83,9 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
             // Glassmorphic Status Bar Card
             StatusBarCard(
                 statusMessage = statusMsgState,
+                deviceStatusText = deviceStatusState,
+                batteryLevel = batteryLevelState,
+                isCharging = isChargingState,
                 isLoading = isLoadingState
             )
             

@@ -14,6 +14,7 @@ import com.vahitkeskin.loopsweep.utils.readInt32BE
 import com.vahitkeskin.loopsweep.utils.Constants
 
 import com.vahitkeskin.loopsweep.utils.Logger
+import com.vahitkeskin.loopsweep.domain.model.VacuumProperties
 
 object VacuumClient {
     private suspend fun sendUdp(host: String, port: Int, requestBytes: ByteArray, timeoutMs: Long = 2000): ByteArray? {
@@ -131,6 +132,93 @@ object VacuumClient {
                 } else {
                     Result.failure(Exception("Device error: $responseString"))
                 }
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun parsePropertyValue(json: String, siid: Int, piid: Int): Int? {
+        try {
+            val resultStart = json.indexOf("\"result\":")
+            if (resultStart == -1) return null
+            val arrayStart = json.indexOf("[", resultStart)
+            val arrayEnd = json.indexOf("]", arrayStart)
+            if (arrayStart == -1 || arrayEnd == -1) return null
+            val arrayContent = json.substring(arrayStart + 1, arrayEnd)
+            
+            val objects = arrayContent.split("}")
+            for (obj in objects) {
+                if (obj.contains("\"siid\":$siid") && obj.contains("\"piid\":$piid")) {
+                    val valuePattern = "\"value\":\\s*(\\d+)".toRegex()
+                    val match = valuePattern.find(obj)
+                    if (match != null) {
+                        return match.groupValues[1].toIntOrNull()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Logger.e("VacuumClient", "Error parsing property value (siid=$siid, piid=$piid): ${e.message}", e)
+        }
+        return null
+    }
+
+    suspend fun getProperties(host: String, tokenHex: String): Result<VacuumProperties> {
+        return try {
+            val tokenBytes = tokenHex.hexToByteArray()
+            if (tokenBytes.size != 16) {
+                return Result.failure(Exception("Token must be exactly 32 hex characters"))
+            }
+            
+            // Step 1: Handshake
+            val helloPacket = buildHelloPacket()
+            val helloResponse = sendUdp(host, Constants.VACUUM_PORT, helloPacket, timeoutMs = 2000)
+                ?: return Result.failure(Exception("Handshake failed. Local network error or device is offline."))
+            
+            if (helloResponse.size < 32) {
+                return Result.failure(Exception("Invalid handshake response from device."))
+            }
+            
+            val deviceId = helloResponse.copyOfRange(8, 12)
+            val stamp = helloResponse.readInt32BE(12)
+            
+            val deviceIdLong = (helloResponse.readInt32BE(8).toLong()) and 0xFFFFFFFFL
+            val didStr = deviceIdLong.toString()
+            Logger.i("VacuumClient", "Handshake success for getProperties: did=$didStr, stamp=$stamp")
+            
+            // Key / IV derivation
+            val key = MD5.hash(tokenBytes)
+            val iv = MD5.hash(key + tokenBytes)
+            
+            // Step 2: Encrypt Payload (MIoT Get Properties: siid 2 piid 1, siid 3 piid 1)
+            val jsonPayload = "{\"id\":100,\"method\":\"get_properties\",\"params\":[{\"did\":\"$didStr\",\"siid\":2,\"piid\":1},{\"did\":\"$didStr\",\"siid\":3,\"piid\":1}]}"
+            Logger.i("VacuumClient", "Sending properties query: $jsonPayload")
+            val payloadBytes = jsonPayload.encodeToByteArray()
+            val encryptedPayload = encryptAes128Cbc(payloadBytes, key, iv)
+            
+            // Step 3: Build command packet
+            val commandPacket = buildCommandPacket(deviceId, stamp + 1, tokenBytes, encryptedPayload)
+            
+            // Step 4: Send & Receive
+            val responsePacket = sendUdp(host, Constants.VACUUM_PORT, commandPacket, timeoutMs = 3000)
+                ?: return Result.failure(Exception("Properties query sent, but vacuum cleaner did not respond."))
+            
+            if (responsePacket.size < 32) {
+                return Result.failure(Exception("Received corrupted response packet."))
+            }
+            
+            val encryptedResponsePayload = responsePacket.copyOfRange(32, responsePacket.size)
+            if (encryptedResponsePayload.isEmpty()) {
+                return Result.failure(Exception("Properties query received empty payload response."))
+            } else {
+                val decryptedResponsePayload = decryptAes128Cbc(encryptedResponsePayload, key, iv)
+                val responseString = decryptedResponsePayload.decodeToString()
+                Logger.i("VacuumClient", "Decrypted properties response: $responseString")
+                
+                val statusCode = parsePropertyValue(responseString, 2, 1)
+                val batteryLevel = parsePropertyValue(responseString, 3, 1)
+                
+                Result.success(VacuumProperties(batteryLevel = batteryLevel, statusCode = statusCode))
             }
         } catch (e: Exception) {
             Result.failure(e)
