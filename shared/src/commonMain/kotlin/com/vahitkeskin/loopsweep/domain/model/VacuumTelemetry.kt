@@ -12,5 +12,6 @@ data class VacuumTelemetry(
     val mainBrushLife: Int?,
     val filterLife: Int?,
     val mopLife: Int?,
-    val cleaningPath: String?
+    val cleaningPath: String?,
+    val rawJson: String? = null
 )

@@ -33,10 +33,14 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.math.atan2
 
+import com.vahitkeskin.loopsweep.domain.model.VacuumTelemetry
+
 @Composable
 fun RealisticRadarCard(
     isVisible: Boolean,
     onToggleVisibility: () -> Unit,
+    telemetry: VacuumTelemetry?,
+    deviceStatusText: String,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -100,22 +104,28 @@ fun RealisticRadarCard(
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Spacer(modifier = Modifier.height(16.dp))
-                RealisticRadarDisplay()
+                RealisticRadarDisplay(telemetry, deviceStatusText)
             }
         }
     }
 }
 
 @Composable
-fun RealisticRadarDisplay() {
+fun RealisticRadarDisplay(
+    telemetry: VacuumTelemetry?,
+    deviceStatusText: String
+) {
     val infiniteTransition = rememberInfiniteTransition()
 
-    // 1. Rotation Angle for the sweep line (2.5 seconds per rotation)
+    val isActive = telemetry?.statusCode in listOf(5, 6, 7)
+    val sweepDuration = if (isActive) 2800 else 10000
+
+    // 1. Rotation Angle for the sweep line
     val sweepAngle by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2800, easing = LinearEasing),
+            animation = tween(sweepDuration, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         )
     )
@@ -327,7 +337,7 @@ fun RealisticRadarDisplay() {
                 // a nice trailing glow for about 120-150 degrees before fading to black.
                 val blipAlpha = kotlin.math.exp(-angleDiff * 0.018f)
 
-                if (blipAlpha > 0.02f) {
+                if (isActive && blipAlpha > 0.02f) {
                     // 1. Draw glowing outer halo
                     drawCircle(
                         color = Color(0xFFEF4444).copy(alpha = blipAlpha * 0.2f),
@@ -376,9 +386,11 @@ fun RealisticRadarDisplay() {
                 .align(Alignment.TopStart)
                 .padding(12.dp)
         ) {
-            HudText("SYS: KMP.LIDAR.2.3")
-            HudText("SWEEP SPEED: 21.4 RPM")
-            HudText("RANGE SCALE: 8.0 METERS")
+            HudText("SYS: KMP.LIDAR.v2.3")
+            val sweepRPM = if (isActive) "24.0 RPM" else "0.0 RPM (STANDBY)"
+            HudText("SWEEP SPEED: $sweepRPM")
+            val statusLabel = if (deviceStatusText.isNotEmpty()) deviceStatusText.uppercase() else "OFFLINE"
+            HudText("SYS STATE: $statusLabel")
         }
 
         // Right Column HUD Info
@@ -390,8 +402,11 @@ fun RealisticRadarDisplay() {
         ) {
             val displayAngle = sweepAngle.toInt().toString().padStart(3, '0')
             HudText("AZIMUTH: $displayAngle°")
-            HudText("SECTOR: MULTI-ROOM")
-            HudText("TARGETS STAGED: 5", color = Color(0xFFEF4444))
+            val batteryLevel = telemetry?.batteryLevel ?: 0
+            HudText("BATTERY: $batteryLevel%")
+            val targetsCount = if (isActive) "5 ACTIVE" else "0 STANDBY"
+            val targetsColor = if (isActive) Color(0xFFEF4444) else Color(0xFF10B981).copy(alpha = 0.8f)
+            HudText("OBSTACLES: $targetsCount", color = targetsColor)
         }
 
         // Bottom Overlay status
@@ -402,8 +417,13 @@ fun RealisticRadarDisplay() {
                 .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
                 .padding(horizontal = 8.dp, vertical = 2.dp)
         ) {
+            val bottomStatusText = when (telemetry?.statusCode) {
+                5, 6, 7 -> "SWEEP SCANNING SYSTEM STATE: ACTIVE SCANNING..."
+                4 -> "SWEEP SCANNING SYSTEM STATE: CHARGING // STANDBY"
+                else -> "SWEEP SCANNING SYSTEM STATE: DOCKED // SECURE"
+            }
             Text(
-                text = "SWEEP SCANNING SYSTEM STATE: SECURE // ECHO ECHO",
+                text = bottomStatusText,
                 color = Color(0xFF10B981).copy(alpha = 0.7f),
                 fontSize = 9.sp,
                 fontFamily = FontFamily.Monospace,

@@ -106,7 +106,9 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
 
             RealisticRadarCard(
                 isVisible = isRadarVisibleState,
-                onToggleVisibility = { viewModel.toggleRadarVisibility() }
+                onToggleVisibility = { viewModel.toggleRadarVisibility() },
+                telemetry = telemetryState,
+                deviceStatusText = deviceStatusState
             )
             
             Spacer(modifier = Modifier.height(20.dp))

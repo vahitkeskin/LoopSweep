@@ -7,6 +7,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -21,7 +24,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vahitkeskin.loopsweep.domain.model.VacuumTelemetry
@@ -37,7 +45,7 @@ fun TelemetryDashboard(
     distanceMeters: Double,
     modifier: Modifier = Modifier
 ) {
-    var activeTab by remember { mutableStateOf(0) } // 0: Harita & Telemetri, 1: Analiz Grafikleri, 2: Olay Günlüğü & Sarf Malzemeleri
+    var activeTab by remember { mutableStateOf(0) } // 0: Harita, 1: Detaylar, 2: Grafikler, 3: Sarf & Log, 4: Ham JSON
 
     Column(
         modifier = modifier
@@ -53,16 +61,17 @@ fun TelemetryDashboard(
             )
             .padding(16.dp)
     ) {
-        // Dashboard Tab Selector
+        // Dashboard Tab Selector (Horizontal Scrollable for KMP compatibility and premium feel)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color.White.copy(alpha = 0.04f))
                 .padding(4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            val tabs = listOf("Harita & Radar", "Grafik Analiz", "Günlük & Sarf")
+            val tabs = listOf("Radar Harita", "Detaylı Veriler", "Grafik Analiz", "Sarf & Günlük", "Ham JSON")
             tabs.forEachIndexed { index, title ->
                 val selected = activeTab == index
                 Button(
@@ -72,8 +81,7 @@ fun TelemetryDashboard(
                         contentColor = if (selected) Color.White else Color.White.copy(alpha = 0.6f)
                     ),
                     shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                    modifier = Modifier.weight(1f)
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
                 ) {
                     Text(
                         text = title,
@@ -89,8 +97,10 @@ fun TelemetryDashboard(
 
         when (activeTab) {
             0 -> TabMapAndTelemetry(telemetry, distanceMeters)
-            1 -> TabCharts(batteryHistory, areaHistory)
-            2 -> TabLogsAndConsumables(telemetry, eventLog)
+            1 -> TabDetailedTelemetry(telemetry, distanceMeters)
+            2 -> TabCharts(batteryHistory, areaHistory)
+            3 -> TabLogsAndConsumables(telemetry, eventLog)
+            4 -> TabRawJson(telemetry)
         }
     }
 }
@@ -99,7 +109,7 @@ fun TelemetryDashboard(
 fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
     val isCleaning = telemetry?.statusCode in listOf(5, 6, 7)
 
-    // Telemetry Mini Metrics Grid
+    // Telemetry Mini Metrics Row (Optimized to 3 items to avoid squishing on mobile)
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -107,18 +117,6 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
         MetricCard("Mesafe", "${distanceMeters.toString().take(5)} m", "🧭", Modifier.weight(1f))
         MetricCard("Çalışma Süresi", "${telemetry?.cleanTimeMinutes ?: 0} dk", "⏱️", Modifier.weight(1f))
         MetricCard("Alan", "${telemetry?.cleanAreaSqm ?: 0} m²", "📐", Modifier.weight(1f))
-        MetricCard(
-            "Emiş Gücü",
-            when (telemetry?.suctionState) {
-                0 -> "Sessiz"
-                1 -> "Standart"
-                2 -> "Orta"
-                3 -> "Turbo"
-                else -> "Otomatik"
-            },
-            "🌀",
-            Modifier.weight(1.2f)
-        )
     }
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -347,6 +345,200 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
 }
 
 @Composable
+fun TabDetailedTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        // Active warning/fault card
+        val fault = telemetry?.faultCode ?: 0
+        if (fault != 0) {
+            FaultAlertCard(faultCode = fault)
+        }
+
+        // 3x2 Grid of Detailed Metrics Cards
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                MetricCard("Mesafe", "${distanceMeters.toString().take(5)} m", "🧭", Modifier.weight(1f))
+                MetricCard("Çalışma Süresi", "${telemetry?.cleanTimeMinutes ?: 0} dk", "⏱️", Modifier.weight(1f))
+                MetricCard("Alan", "${telemetry?.cleanAreaSqm ?: 0} m²", "📐", Modifier.weight(1f))
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                val isCharging = telemetry?.statusCode == 4
+                MetricCard("Pil Seviyesi", "%${telemetry?.batteryLevel ?: 0}", if (isCharging) "⚡" else "🔋", Modifier.weight(1f))
+                MetricCard(
+                    "Emiş Gücü",
+                    when (telemetry?.suctionState) {
+                        0 -> "Sessiz"
+                        1 -> "Standart"
+                        2 -> "Orta"
+                        3 -> "Turbo"
+                        else -> "Otomatik"
+                    },
+                    "🌀",
+                    Modifier.weight(1f)
+                )
+                MetricCard(
+                    "Su Akışı",
+                    when (telemetry?.waterState) {
+                        0 -> "Düşük"
+                        1 -> "Orta"
+                        2 -> "Yüksek"
+                        else -> "Kapalı"
+                    },
+                    "💧",
+                    Modifier.weight(1f)
+                )
+            }
+        }
+
+        // Visual Hardware-like Segment Gauges
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color.White.copy(alpha = 0.03f))
+                .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
+                .padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "📊 PARAMETRİK SEVİYE GÖSTERGELERİ",
+                color = Color.White.copy(alpha = 0.8f),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+
+            val suctionVal = (telemetry?.suctionState ?: 1) + 1
+            SegmentedBarGauge(
+                label = "Emiş Gücü Kademesi (Vakum Motor Hızı)",
+                activeSegments = suctionVal.coerceIn(1, 4),
+                totalSegments = 4,
+                activeColor = Color(0xFF8B5CF6)
+            )
+
+            val waterVal = (telemetry?.waterState ?: 1) + 1
+            SegmentedBarGauge(
+                label = "Su Pompası Debisi (Paspas Islaklığı)",
+                activeSegments = waterVal.coerceIn(1, 3),
+                totalSegments = 3,
+                activeColor = Color(0xFF06B6D4)
+            )
+        }
+    }
+}
+
+@Composable
+fun SegmentedBarGauge(label: String, activeSegments: Int, totalSegments: Int, activeColor: Color) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = label,
+                color = Color.White.copy(alpha = 0.6f),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = "$activeSegments / $totalSegments",
+                color = Color.White,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            for (i in 1..totalSegments) {
+                val isActive = i <= activeSegments
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(if (isActive) activeColor else Color.White.copy(alpha = 0.05f))
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun FaultAlertCard(faultCode: Int) {
+    val faultText = when (faultCode) {
+        1 -> "Lazer Mesafe Sensörü (LDS) engellendi veya takıldı."
+        2 -> "Çarpışma tamponu sıkıştı. Lütfen temizleyin."
+        3 -> "Tekerlek havada kaldı. Düz zemine koyun."
+        4 -> "Düşme sensörlerini temizleyin."
+        5 -> "Ana fırça dolandı. Temizleyin."
+        6 -> "Yan fırça dolandı. Temizleyin."
+        7 -> "Tahrik tekerleği sıkıştı."
+        8 -> "Cihaz bir alanda sıkıştı."
+        9 -> "Toz haznesi takılı değil."
+        10 -> "Su tankı takılı değil."
+        11 -> "Mop braketi takılı değil."
+        else -> "Hata tespit edildi (Hata Kodu: $faultCode)"
+    }
+    
+    val infiniteTransition = rememberInfiniteTransition()
+    val warningAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = EaseInOutQuad),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color(0xFFEF4444).copy(alpha = 0.15f * warningAlpha))
+            .border(1.dp, Color(0xFFEF4444).copy(alpha = 0.4f * warningAlpha), RoundedCornerShape(12.dp))
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "⚠️",
+            fontSize = 18.sp,
+            modifier = Modifier.padding(end = 10.dp)
+        )
+        Column {
+            Text(
+                text = "CİHAZ UYARISI / HATA BİLDİRİMİ",
+                color = Color(0xFFFCA5A5),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = faultText,
+                color = Color.White,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+@Composable
 fun TabCharts(batteryHistory: List<Int>, areaHistory: List<Int>) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -565,6 +757,93 @@ fun TabLogsAndConsumables(telemetry: VacuumTelemetry?, eventLog: List<String>) {
 }
 
 @Composable
+fun TabRawJson(telemetry: VacuumTelemetry?) {
+    val rawJson = telemetry?.rawJson
+    
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "🔌 CANLI UDP JSON RESPONSE PAYLOAD",
+                color = Color.White.copy(alpha = 0.8f),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = if (rawJson != null) "GÜNCEL" else "ÇEVRİMDIŞI",
+                color = if (rawJson != null) Color(0xFF10B981) else Color.White.copy(alpha = 0.4f),
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(if (rawJson != null) Color(0xFF10B981).copy(alpha = 0.15f) else Color.White.copy(alpha = 0.05f))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(280.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color(0xFF030712)) // Darkest gray, terminal background
+                .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
+                .padding(12.dp)
+        ) {
+            if (rawJson == null) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("📡", fontSize = 24.sp)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Robot süpürgeden gelen UDP paketleri bekleniyor...",
+                            color = Color.White.copy(alpha = 0.4f),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            } else {
+                // Minify and highlight
+                val formattedJson = remember(rawJson) {
+                    formatAndHighlightJson(minifyJson(rawJson))
+                }
+                
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .horizontalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        text = formattedJson,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 11.sp,
+                        lineHeight = 15.sp
+                    )
+                }
+            }
+        }
+        
+        Text(
+            text = "Not: Cihaz MIoT protokolü üzerinden UDP paketleri gönderir. Bu veriler anlık olarak çözülüp yukarıda sunulmaktadır.",
+            color = Color.White.copy(alpha = 0.4f),
+            fontSize = 9.sp,
+            lineHeight = 13.sp
+        )
+    }
+}
+
+@Composable
 fun ConsumableRing(label: String, pct: Int, color: Color) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -632,5 +911,134 @@ fun MetricCard(label: String, value: String, icon: String, modifier: Modifier = 
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold
         )
+    }
+}
+
+// Helper methods for formatting and syntax highlighting JSON safely in KMP
+
+fun minifyJson(json: String): String {
+    val sb = StringBuilder()
+    var inString = false
+    var i = 0
+    val len = json.length
+    while (i < len) {
+        val char = json[i]
+        if (char == '"' && (i == 0 || json[i - 1] != '\\')) {
+            inString = !inString
+            sb.append(char)
+        } else if (inString) {
+            sb.append(char)
+        } else {
+            if (!char.isWhitespace()) {
+                sb.append(char)
+            }
+        }
+        i++
+    }
+    return sb.toString()
+}
+
+fun formatAndHighlightJson(json: String): AnnotatedString {
+    return buildAnnotatedString {
+        var indent = 0
+        var inString = false
+        var isKey = false
+        val len = json.length
+        var i = 0
+        
+        while (i < len) {
+            val char = json[i]
+            
+            // Check for string boundaries
+            if (char == '"' && (i == 0 || json[i - 1] != '\\')) {
+                inString = !inString
+                withStyle(style = SpanStyle(color = if (isKey) Color(0xFF00E5FF) else Color(0xFFA5D6A7))) {
+                    append(char)
+                }
+                i++
+                continue
+            }
+            
+            if (inString) {
+                withStyle(style = SpanStyle(color = if (isKey) Color(0xFF00E5FF) else Color(0xFFA5D6A7))) {
+                    append(char)
+                }
+                i++
+                continue
+            }
+            
+            // Handle whitespaces outside string
+            if (char.isWhitespace()) {
+                append(char)
+                i++
+                continue
+            }
+            
+            when (char) {
+                '{', '[' -> {
+                    withStyle(style = SpanStyle(color = Color.White.copy(alpha = 0.8f))) {
+                        append(char)
+                    }
+                    indent++
+                    append("\n" + "  ".repeat(indent))
+                    isKey = true
+                }
+                '}', ']' -> {
+                    indent = (indent - 1).coerceAtLeast(0)
+                    append("\n" + "  ".repeat(indent))
+                    withStyle(style = SpanStyle(color = Color.White.copy(alpha = 0.8f))) {
+                        append(char)
+                    }
+                }
+                ',' -> {
+                    withStyle(style = SpanStyle(color = Color.White.copy(alpha = 0.8f))) {
+                        append(char)
+                    }
+                    append("\n" + "  ".repeat(indent))
+                    isKey = true
+                }
+                ':' -> {
+                    withStyle(style = SpanStyle(color = Color.White.copy(alpha = 0.6f))) {
+                        append(" : ")
+                    }
+                    isKey = false
+                }
+                else -> {
+                    // Check if number or boolean or null
+                    if (char.isDigit() || char == '-' || char == '.') {
+                        var numStr = ""
+                        while (i < len && (json[i].isDigit() || json[i] == '.' || json[i] == '-' || json[i] == '+' || json[i] == 'e' || json[i] == 'E')) {
+                            numStr += json[i]
+                            i++
+                        }
+                        withStyle(style = SpanStyle(color = Color(0xFFFFB74D))) {
+                            append(numStr)
+                        }
+                        continue
+                    } else if (json.startsWith("true", i)) {
+                        withStyle(style = SpanStyle(color = Color(0xFF4FC3F7))) {
+                            append("true")
+                        }
+                        i += 4
+                        continue
+                    } else if (json.startsWith("false", i)) {
+                        withStyle(style = SpanStyle(color = Color(0xFFE57373))) {
+                            append("false")
+                        }
+                        i += 5
+                        continue
+                    } else if (json.startsWith("null", i)) {
+                        withStyle(style = SpanStyle(color = Color(0xFFBA68C8))) {
+                            append("null")
+                        }
+                        i += 4
+                        continue
+                    } else {
+                        append(char)
+                    }
+                }
+            }
+            i++
+        }
     }
 }

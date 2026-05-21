@@ -386,7 +386,8 @@ object VacuumClient {
                         mainBrushLife = mainBrush,
                         filterLife = filter,
                         mopLife = mop,
-                        cleaningPath = cleaningPath
+                        cleaningPath = cleaningPath,
+                        rawJson = responseString
                     )
                 )
             }
