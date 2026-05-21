@@ -6,8 +6,15 @@ import com.vahitkeskin.loopsweep.domain.usecase.CleanRoomUseCase
 import com.vahitkeskin.loopsweep.domain.usecase.GetVacuumPropertiesUseCase
 import com.vahitkeskin.loopsweep.domain.usecase.GetVacuumTelemetryUseCase
 import com.vahitkeskin.loopsweep.domain.usecase.GetRoomsUseCase
+import com.vahitkeskin.loopsweep.data.local.createDataStore
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 
 class AppContainer {
+    val dataStore: DataStore<Preferences> by lazy {
+        createDataStore()
+    }
+
     val vacuumRepository: VacuumRepository by lazy {
         VacuumRepositoryImpl()
     }

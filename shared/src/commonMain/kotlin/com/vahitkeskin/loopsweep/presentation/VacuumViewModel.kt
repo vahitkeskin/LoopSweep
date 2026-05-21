@@ -15,12 +15,17 @@ import com.vahitkeskin.loopsweep.utils.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
 
 class VacuumViewModel(
     private val cleanRoomUseCase: CleanRoomUseCase,
     private val getVacuumPropertiesUseCase: GetVacuumPropertiesUseCase,
     private val getVacuumTelemetryUseCase: GetVacuumTelemetryUseCase,
-    private val getRoomsUseCase: GetRoomsUseCase
+    private val getRoomsUseCase: GetRoomsUseCase,
+    private val dataStore: DataStore<Preferences>
 ) : ViewModel() {
 
     val ipAddress = MutableStateFlow(BuildConfig.VACUUM_IP)
@@ -61,11 +66,34 @@ class VacuumViewModel(
     private val _rooms = MutableStateFlow<List<RoomItem>>(Constants.DEFAULT_ROOMS)
     val rooms: StateFlow<List<RoomItem>> = _rooms
 
+    private val _isRadarVisible = MutableStateFlow(true)
+    val isRadarVisible: StateFlow<Boolean> = _isRadarVisible
+
+    private val RADAR_VISIBLE_KEY = booleanPreferencesKey("radar_visible")
+
     private var logTickCounter = 0
     private var roomsFetched = false
 
     init {
         startStatusPolling()
+        loadRadarVisibility()
+    }
+
+    private fun loadRadarVisibility() {
+        viewModelScope.launch {
+            dataStore.data.collect { preferences ->
+                _isRadarVisible.value = preferences[RADAR_VISIBLE_KEY] ?: true
+            }
+        }
+    }
+
+    fun toggleRadarVisibility() {
+        viewModelScope.launch {
+            dataStore.edit { preferences ->
+                val current = preferences[RADAR_VISIBLE_KEY] ?: true
+                preferences[RADAR_VISIBLE_KEY] = !current
+            }
+        }
     }
 
     private fun startStatusPolling() {

@@ -19,6 +19,7 @@ import com.vahitkeskin.loopsweep.ui.components.HeaderCard
 import com.vahitkeskin.loopsweep.ui.components.RoomCard
 import com.vahitkeskin.loopsweep.ui.components.StatusBarCard
 import com.vahitkeskin.loopsweep.ui.components.TelemetryDashboard
+import com.vahitkeskin.loopsweep.ui.components.RealisticRadarCard
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
@@ -40,6 +41,7 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
     
     // Dynamic rooms from ViewModel (starts as DEFAULT_ROOMS, updates when device responds)
     val rooms by viewModel.rooms.collectAsStateWithLifecycle()
+    val isRadarVisibleState by viewModel.isRadarVisible.collectAsState()
     val scrollState = rememberScrollState()
 
     // Track repeat counts locally per room index: starts at 1, goes up to 3
@@ -98,6 +100,13 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
                 batteryLevel = batteryLevelState,
                 isCharging = isChargingState,
                 isLoading = isLoadingState
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+
+            RealisticRadarCard(
+                isVisible = isRadarVisibleState,
+                onToggleVisibility = { viewModel.toggleRadarVisibility() }
             )
             
             Spacer(modifier = Modifier.height(20.dp))

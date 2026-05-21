@@ -17,7 +17,8 @@ fun VacuumApp() {
             cleanRoomUseCase = appContainer.cleanRoomUseCase,
             getVacuumPropertiesUseCase = appContainer.getVacuumPropertiesUseCase,
             getVacuumTelemetryUseCase = appContainer.getVacuumTelemetryUseCase,
-            getRoomsUseCase = appContainer.getRoomsUseCase
+            getRoomsUseCase = appContainer.getRoomsUseCase,
+            dataStore = appContainer.dataStore
         )
     }
     
