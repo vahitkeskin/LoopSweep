@@ -1,7 +1,7 @@
 package com.vahitkeskin.loopsweep
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -243,7 +243,7 @@ fun GlassmorphicBottomNavigation(
     onCleanClicked: () -> Unit
 ) {
     val barHeight = 80.dp
-    val buttonSize = 68.dp
+    val buttonSize = 58.dp
     val outerHeight = 124.dp
 
     Box(
@@ -252,21 +252,68 @@ fun GlassmorphicBottomNavigation(
             .height(outerHeight),
         contentAlignment = Alignment.BottomCenter
     ) {
-        // 1. Dark bottom bar background with CutoutShape (matching screen background)
-        Box(
+        // 1. Bottom bar - opaque background with CutoutShape, grey line on top profile
+        Canvas(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(barHeight)
-                .background(
-                    color = Color(0xFF0A0F1D).copy(alpha = 0.75f),
-                    shape = CutoutShape()
+        ) {
+            val width = size.width
+            val height = size.height
+            val cutoutW = 120.dp.toPx()
+            val cutoutH = 36.dp.toPx()
+            val center = width / 2f
+            val leftStart = center - cutoutW / 2f
+            val rightEnd = center + cutoutW / 2f
+            val strokeWidth = 1.dp.toPx()
+            val halfStroke = strokeWidth / 2f
+
+            // Draw opaque background clipped to CutoutShape
+            val bgPath = androidx.compose.ui.graphics.Path().apply {
+                moveTo(0f, 0f)
+                lineTo(leftStart, 0f)
+                cubicTo(
+                    x1 = leftStart + cutoutW * 0.3f, y1 = 0f,
+                    x2 = center - cutoutW * 0.25f, y2 = cutoutH,
+                    x3 = center, y3 = cutoutH
                 )
-                .border(
-                    width = 1.dp,
-                    color = Color(0xFFFBBF24), // Golden border matching the reference screenshot
-                    shape = CutoutShape()
+                cubicTo(
+                    x1 = center + cutoutW * 0.25f, y1 = cutoutH,
+                    x2 = rightEnd - cutoutW * 0.3f, y2 = 0f,
+                    x3 = rightEnd, y3 = 0f
                 )
-        )
+                lineTo(width, 0f)
+                lineTo(width, height)
+                lineTo(0f, height)
+                close()
+            }
+            drawPath(
+                path = bgPath,
+                color = Color(0xFF0A0F1D)
+            )
+
+            // Draw grey line along the top profile of the cutout
+            val topPath = androidx.compose.ui.graphics.Path().apply {
+                moveTo(0f, halfStroke)
+                lineTo(leftStart, halfStroke)
+                cubicTo(
+                    x1 = leftStart + cutoutW * 0.3f, y1 = halfStroke,
+                    x2 = center - cutoutW * 0.25f, y2 = cutoutH + halfStroke,
+                    x3 = center, y3 = cutoutH + halfStroke
+                )
+                cubicTo(
+                    x1 = center + cutoutW * 0.25f, y1 = cutoutH + halfStroke,
+                    x2 = rightEnd - cutoutW * 0.3f, y2 = halfStroke,
+                    x3 = rightEnd, y3 = halfStroke
+                )
+                lineTo(width, halfStroke)
+            }
+            drawPath(
+                path = topPath,
+                color = Color.DarkGray,
+                style = Stroke(width = strokeWidth)
+            )
+        }
 
         // 2. The Row containing three columns aligned to the bottom
         Row(
@@ -357,7 +404,7 @@ fun GlassmorphicBottomNavigation(
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 12.dp) // Sits perfectly in the cutout curve
+                .padding(top = 16.dp) // Slightly higher padding for visible gap from cutout
                 .size(buttonSize)
                 .clickable {
                     onCleanClicked()
@@ -377,7 +424,7 @@ fun GlassmorphicBottomNavigation(
                 letterSpacing = 0.5.sp,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 9.dp)
             )
         }
     }
