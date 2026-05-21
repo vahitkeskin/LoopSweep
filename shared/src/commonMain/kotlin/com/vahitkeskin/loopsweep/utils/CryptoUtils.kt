@@ -397,3 +397,15 @@ fun ByteArray.readInt32BE(offset: Int): Int {
            ((this[offset + 2].toInt() and 0xFF) shl 8) or
            (this[offset + 3].toInt() and 0xFF)
 }
+
+fun ByteArray.toHexString(): String {
+    val hexChars = "0123456789abcdef"
+    val result = StringBuilder(this.size * 2)
+    for (b in this) {
+        val i = b.toInt() and 0xFF
+        result.append(hexChars[i ushr 4])
+        result.append(hexChars[i and 0x0F])
+    }
+    return result.toString()
+}
+

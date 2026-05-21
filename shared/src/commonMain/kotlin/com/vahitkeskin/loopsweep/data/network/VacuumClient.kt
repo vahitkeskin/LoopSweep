@@ -12,6 +12,7 @@ import com.vahitkeskin.loopsweep.utils.decryptAes128Cbc
 import com.vahitkeskin.loopsweep.utils.hexToByteArray
 import com.vahitkeskin.loopsweep.utils.readInt32BE
 import com.vahitkeskin.loopsweep.utils.Constants
+import com.vahitkeskin.loopsweep.utils.toHexString
 
 import com.vahitkeskin.loopsweep.utils.Logger
 import com.vahitkeskin.loopsweep.domain.model.VacuumProperties
@@ -83,8 +84,10 @@ object VacuumClient {
             
             // Step 1: Handshake
             val helloPacket = buildHelloPacket()
+            Logger.i("VacuumClient", "Atılan Handshake UDP Paketi (Hex): ${helloPacket.toHexString()}")
             val helloResponse = sendUdp(host, Constants.VACUUM_PORT, helloPacket, timeoutMs = 2000)
                 ?: return Result.failure(Exception("Handshake failed. Local network error or device is offline."))
+            Logger.i("VacuumClient", "Alınan Handshake UDP Paketi (Hex): ${helloResponse.toHexString()}")
             
             if (helloResponse.size < 32) {
                 return Result.failure(Exception("Invalid handshake response from device."))
@@ -103,16 +106,18 @@ object VacuumClient {
             
             // Step 2: Encrypt Payload (MIoT Action: Service ID 2, Action ID 6: start-room-sweep)
             val jsonPayload = "{\"id\":1,\"method\":\"action\",\"params\":{\"did\":\"$didStr\",\"siid\":2,\"aiid\":6,\"in\":[\"$roomId\"]}}"
-            Logger.i("VacuumClient", "Sending payload: $jsonPayload")
+            Logger.i("VacuumClient", "Atılan Request Payload (JSON): $jsonPayload")
             val payloadBytes = jsonPayload.encodeToByteArray()
             val encryptedPayload = encryptAes128Cbc(payloadBytes, key, iv)
             
             // Step 3: Build command packet
             val commandPacket = buildCommandPacket(deviceId, stamp + 1, tokenBytes, encryptedPayload)
+            Logger.i("VacuumClient", "Atılan Request UDP Paketi (Hex): ${commandPacket.toHexString()}")
             
             // Step 4: Send & Receive
             val responsePacket = sendUdp(host, Constants.VACUUM_PORT, commandPacket, timeoutMs = 3000)
                 ?: return Result.failure(Exception("Clean command sent, but vacuum cleaner did not respond."))
+            Logger.i("VacuumClient", "Alınan Response UDP Paketi (Hex): ${responsePacket.toHexString()}")
             
             if (responsePacket.size < 32) {
                 return Result.failure(Exception("Received corrupted response packet."))
@@ -120,12 +125,12 @@ object VacuumClient {
             
             val encryptedResponsePayload = responsePacket.copyOfRange(32, responsePacket.size)
             if (encryptedResponsePayload.isEmpty()) {
-                Logger.i("VacuumClient", "Command ACK received (empty payload)")
+                Logger.i("VacuumClient", "Alınan Response ACK (Boş Payload)")
                 Result.success("Success (Ack)")
             } else {
                 val decryptedResponsePayload = decryptAes128Cbc(encryptedResponsePayload, key, iv)
                 val responseString = decryptedResponsePayload.decodeToString()
-                Logger.i("VacuumClient", "Decrypted response: $responseString")
+                Logger.i("VacuumClient", "Alınan Response Payload (JSON): $responseString")
                 
                 if (responseString.contains("\"result\":") || responseString.lowercase().contains("ok")) {
                     Result.success(responseString)
@@ -172,8 +177,10 @@ object VacuumClient {
             
             // Step 1: Handshake
             val helloPacket = buildHelloPacket()
+            Logger.i("VacuumClient", "Atılan Handshake UDP Paketi (Hex): ${helloPacket.toHexString()}")
             val helloResponse = sendUdp(host, Constants.VACUUM_PORT, helloPacket, timeoutMs = 2000)
                 ?: return Result.failure(Exception("Handshake failed. Local network error or device is offline."))
+            Logger.i("VacuumClient", "Alınan Handshake UDP Paketi (Hex): ${helloResponse.toHexString()}")
             
             if (helloResponse.size < 32) {
                 return Result.failure(Exception("Invalid handshake response from device."))
@@ -192,16 +199,18 @@ object VacuumClient {
             
             // Step 2: Encrypt Payload (MIoT Get Properties: siid 2 piid 1, siid 3 piid 1)
             val jsonPayload = "{\"id\":100,\"method\":\"get_properties\",\"params\":[{\"did\":\"$didStr\",\"siid\":2,\"piid\":1},{\"did\":\"$didStr\",\"siid\":3,\"piid\":1}]}"
-            Logger.i("VacuumClient", "Sending properties query: $jsonPayload")
+            Logger.i("VacuumClient", "Atılan Request Properties Payload (JSON): $jsonPayload")
             val payloadBytes = jsonPayload.encodeToByteArray()
             val encryptedPayload = encryptAes128Cbc(payloadBytes, key, iv)
             
             // Step 3: Build command packet
             val commandPacket = buildCommandPacket(deviceId, stamp + 1, tokenBytes, encryptedPayload)
+            Logger.i("VacuumClient", "Atılan Request Properties UDP Paketi (Hex): ${commandPacket.toHexString()}")
             
             // Step 4: Send & Receive
             val responsePacket = sendUdp(host, Constants.VACUUM_PORT, commandPacket, timeoutMs = 3000)
                 ?: return Result.failure(Exception("Properties query sent, but vacuum cleaner did not respond."))
+            Logger.i("VacuumClient", "Alınan Response Properties UDP Paketi (Hex): ${responsePacket.toHexString()}")
             
             if (responsePacket.size < 32) {
                 return Result.failure(Exception("Received corrupted response packet."))
@@ -213,7 +222,7 @@ object VacuumClient {
             } else {
                 val decryptedResponsePayload = decryptAes128Cbc(encryptedResponsePayload, key, iv)
                 val responseString = decryptedResponsePayload.decodeToString()
-                Logger.i("VacuumClient", "Decrypted properties response: $responseString")
+                Logger.i("VacuumClient", "Alınan Response Properties Payload (JSON): $responseString")
                 
                 val statusCode = parsePropertyValue(responseString, 2, 1)
                 val batteryLevel = parsePropertyValue(responseString, 3, 1)
