@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.edit
 
 class VacuumViewModel(
@@ -27,6 +28,9 @@ class VacuumViewModel(
     private val getRoomsUseCase: GetRoomsUseCase,
     private val dataStore: DataStore<Preferences>
 ) : ViewModel() {
+
+    private val IP_ADDRESS_KEY = stringPreferencesKey("vacuum_ip")
+    private val TOKEN_KEY = stringPreferencesKey("vacuum_token")
 
     val ipAddress = MutableStateFlow(BuildConfig.VACUUM_IP)
     val token = MutableStateFlow(BuildConfig.VACUUM_TOKEN)
@@ -75,8 +79,33 @@ class VacuumViewModel(
     private var roomsFetched = false
 
     init {
+        loadConnectionSettings()
         startStatusPolling()
         loadRadarVisibility()
+    }
+
+    private fun loadConnectionSettings() {
+        viewModelScope.launch {
+            dataStore.data.collect { preferences ->
+                ipAddress.value = preferences[IP_ADDRESS_KEY] ?: BuildConfig.VACUUM_IP
+                token.value = preferences[TOKEN_KEY] ?: BuildConfig.VACUUM_TOKEN
+            }
+        }
+    }
+
+    fun updateConnection(ip: String, tokenVal: String) {
+        viewModelScope.launch {
+            dataStore.edit { preferences ->
+                preferences[IP_ADDRESS_KEY] = ip
+                preferences[TOKEN_KEY] = tokenVal
+            }
+            roomsFetched = false
+            _deviceStatusText.value = "Bağlanıyor..."
+            _telemetry.value = null
+            _batteryLevel.value = null
+            _isCharging.value = false
+            addLog("Bağlantı ayarları güncellendi. Yeni IP: $ip")
+        }
     }
 
     private fun loadRadarVisibility() {

@@ -409,3 +409,212 @@ fun ByteArray.toHexString(): String {
     return result.toString()
 }
 
+object Base64 {
+    private const val ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+    private val DECODE_TABLE = IntArray(256) { -1 }
+
+    init {
+        for (i in ALPHABET.indices) {
+            DECODE_TABLE[ALPHABET[i].code] = i
+        }
+        DECODE_TABLE['='.code] = 0
+    }
+
+    fun encode(data: ByteArray): String {
+        val result = StringBuilder()
+        var i = 0
+        while (i < data.size) {
+            val b0 = data[i].toInt() and 0xFF
+            val b1 = if (i + 1 < data.size) data[i + 1].toInt() and 0xFF else 0
+            val b2 = if (i + 2 < data.size) data[i + 2].toInt() and 0xFF else 0
+
+            val c0 = b0 ushr 2
+            val c1 = ((b0 and 0x03) shl 4) or (b1 ushr 4)
+            val c2 = ((b1 and 0x0F) shl 2) or (b2 ushr 6)
+            val c3 = b2 and 0x3F
+
+            result.append(ALPHABET[c0])
+            result.append(ALPHABET[c1])
+            if (i + 1 < data.size) {
+                result.append(ALPHABET[c2])
+            } else {
+                result.append('=')
+            }
+            if (i + 2 < data.size) {
+                result.append(ALPHABET[c3])
+            } else {
+                result.append('=')
+            }
+            i += 3
+        }
+        return result.toString()
+    }
+
+    fun decode(data: String): ByteArray {
+        val clean = data.filter { it in ALPHABET }
+        val len = clean.length
+        val byteLen = (len * 3) / 4
+        val result = ByteArray(byteLen)
+        var i = 0
+        var j = 0
+        while (i < len) {
+            val c0 = DECODE_TABLE[clean[i].code]
+            val c1 = if (i + 1 < len) DECODE_TABLE[clean[i + 1].code] else 0
+            val c2 = if (i + 2 < len) DECODE_TABLE[clean[i + 2].code] else 0
+            val c3 = if (i + 3 < len) DECODE_TABLE[clean[i + 3].code] else 0
+
+            val b0 = (c0 shl 2) or (c1 ushr 4)
+            val b1 = ((c1 and 0x0F) shl 4) or (c2 ushr 2)
+            val b2 = ((c2 and 0x03) shl 6) or c3
+
+            if (j < byteLen) result[j++] = b0.toByte()
+            if (j < byteLen) result[j++] = b1.toByte()
+            if (j < byteLen) result[j++] = b2.toByte()
+            i += 4
+        }
+        return result
+    }
+}
+
+object SHA256 {
+    private val K = longArrayOf(
+        0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+        0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+        0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+        0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+        0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+        0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+        0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+        0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+    ).map { it.toInt() }.toIntArray()
+
+    fun hash(message: ByteArray): ByteArray {
+        val messageLenBytes = message.size
+        val numBlocks = ((messageLenBytes + 8) ushr 6) + 1
+        val totalLen = numBlocks shl 6
+        val paddingBytes = ByteArray(totalLen - messageLenBytes)
+        paddingBytes[0] = 0x80.toByte()
+
+        val messageLenBits = messageLenBytes.toLong() shl 3
+        for (i in 0..7) {
+            paddingBytes[paddingBytes.size - 8 + i] = (messageLenBits ushr (8 * (7 - i))).toByte()
+        }
+
+        var h0 = 0x6a09e667
+        var h1 = 0xbb67ae85.toInt()
+        var h2 = 0x3c6ef372
+        var h3 = 0xa54ff53a.toInt()
+        var h4 = 0x510e527f
+        var h5 = 0x9b05688c.toInt()
+        var h6 = 0x1f83d9ab
+        var h7 = 0x5be0cd19
+
+        val w = IntArray(64)
+        for (i in 0 until numBlocks) {
+            val index = i shl 6
+            for (j in 0..15) {
+                val byteIndex = index + (j shl 2)
+                var value = 0
+                for (k in 0..3) {
+                    val bIdx = byteIndex + k
+                    val byteValue = if (bIdx < messageLenBytes) {
+                        message[bIdx].toInt() and 0xFF
+                    } else {
+                        paddingBytes[bIdx - messageLenBytes].toInt() and 0xFF
+                    }
+                    value = value or (byteValue shl (8 * (3 - k)))
+                }
+                w[j] = value
+            }
+
+            for (j in 16..63) {
+                val s0 = rightRotate(w[j - 15], 7) xor rightRotate(w[j - 15], 18) xor (w[j - 15] ushr 3)
+                val s1 = rightRotate(w[j - 2], 17) xor rightRotate(w[j - 2], 19) xor (w[j - 2] ushr 10)
+                w[j] = w[j - 16] + s0 + w[j - 7] + s1
+            }
+
+            var a = h0
+            var b = h1
+            var c = h2
+            var d = h3
+            var e = h4
+            var f = h5
+            var g = h6
+            var h = h7
+
+            for (j in 0..63) {
+                val S1 = rightRotate(e, 6) xor rightRotate(e, 11) xor rightRotate(e, 25)
+                val ch = (e and f) xor (e.inv() and g)
+                val temp1 = h + S1 + ch + K[j] + w[j]
+                val S0 = rightRotate(a, 2) xor rightRotate(a, 13) xor rightRotate(a, 22)
+                val maj = (a and b) xor (a and c) xor (b and c)
+                val temp2 = S0 + maj
+
+                h = g
+                g = f
+                f = e
+                e = d + temp1
+                d = c
+                c = b
+                b = a
+                a = temp1 + temp2
+            }
+
+            h0 += a
+            h1 += b
+            h2 += c
+            h3 += d
+            h4 += e
+            h5 += f
+            h6 += g
+            h7 += h
+        }
+
+        val result = ByteArray(32)
+        writeInt(result, 0, h0)
+        writeInt(result, 4, h1)
+        writeInt(result, 8, h2)
+        writeInt(result, 12, h3)
+        writeInt(result, 16, h4)
+        writeInt(result, 20, h5)
+        writeInt(result, 24, h6)
+        writeInt(result, 28, h7)
+        return result
+    }
+
+    private fun rightRotate(x: Int, amount: Int): Int {
+        return (x ushr amount) or (x shl (32 - amount))
+    }
+
+    private fun writeInt(dest: ByteArray, offset: Int, value: Int) {
+        dest[offset] = (value ushr 24).toByte()
+        dest[offset + 1] = (value ushr 16).toByte()
+        dest[offset + 2] = (value ushr 8).toByte()
+        dest[offset + 3] = value.toByte()
+    }
+}
+
+object HMACSHA256 {
+    fun sign(key: ByteArray, message: ByteArray): ByteArray {
+        var localKey = key
+        if (localKey.size > 64) {
+            localKey = SHA256.hash(localKey)
+        }
+        if (localKey.size < 64) {
+            val padded = ByteArray(64)
+            localKey.copyInto(padded, 0, 0, localKey.size)
+            localKey = padded
+        }
+
+        val oKeyPad = ByteArray(64)
+        val iKeyPad = ByteArray(64)
+        for (i in 0..63) {
+            oKeyPad[i] = (localKey[i].toInt() xor 0x5c).toByte()
+            iKeyPad[i] = (localKey[i].toInt() xor 0x36).toByte()
+        }
+
+        val innerHash = SHA256.hash(iKeyPad + message)
+        return SHA256.hash(oKeyPad + innerHash)
+    }
+}
+
