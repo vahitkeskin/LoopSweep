@@ -589,6 +589,7 @@ fun XiaomiCloudScreen(
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(136.dp))
         }
     }
 }

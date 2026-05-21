@@ -70,38 +70,44 @@ fun VacuumApp() {
         sc == 5 || sc == 6 || sc == 7
     }
 
-    Scaffold(
-        bottomBar = {
-            GlassmorphicBottomNavigation(
-                currentScreen = currentScreen,
-                onScreenSelected = { currentScreen = it },
-                isCleaning = isCleaning,
-                isCharging = isCharging,
-                onCleanClicked = {
-                    viewModel.cleanRoom(99, 1, isAllAreas = true)
-                }
-            )
-        },
-        containerColor = Color(0xFF0A0F1D)
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            when (currentScreen) {
-                Screen.Dashboard -> {
-                    VacuumScreen(viewModel = viewModel)
-                }
-                Screen.Cloud -> {
-                    XiaomiCloudScreen(
-                        viewModel = cloudViewModel,
-                        activeIp = activeIp,
-                        activeToken = activeToken,
-                        onSaveConnection = { ip, token ->
-                            viewModel.updateConnection(ip, token)
-                        }
-                    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0A0F1D))
+    ) {
+        Scaffold(
+            bottomBar = {
+                GlassmorphicBottomNavigation(
+                    currentScreen = currentScreen,
+                    onScreenSelected = { currentScreen = it },
+                    isCleaning = isCleaning,
+                    isCharging = isCharging,
+                    onCleanClicked = {
+                        viewModel.cleanRoom(99, 1, isAllAreas = true)
+                    }
+                )
+            },
+            containerColor = Color.Transparent
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding())
+            ) {
+                when (currentScreen) {
+                    Screen.Dashboard -> {
+                        VacuumScreen(viewModel = viewModel)
+                    }
+                    Screen.Cloud -> {
+                        XiaomiCloudScreen(
+                            viewModel = cloudViewModel,
+                            activeIp = activeIp,
+                            activeToken = activeToken,
+                            onSaveConnection = { ip, token ->
+                                viewModel.updateConnection(ip, token)
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -252,7 +258,7 @@ fun GlassmorphicBottomNavigation(
                 .fillMaxWidth()
                 .height(barHeight)
                 .background(
-                    color = Color(0xFF0A0F1D),
+                    color = Color(0xFF0A0F1D).copy(alpha = 0.75f),
                     shape = CutoutShape()
                 )
                 .border(

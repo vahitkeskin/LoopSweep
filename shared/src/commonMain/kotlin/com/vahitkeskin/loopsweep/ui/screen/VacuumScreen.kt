@@ -191,6 +191,8 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
                 eventLog = eventLogState,
                 distanceMeters = distanceState
             )
+
+            Spacer(modifier = Modifier.height(136.dp))
         }
     }
 }
