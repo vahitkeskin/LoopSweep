@@ -15,7 +15,9 @@ fun VacuumApp() {
     val viewModel = remember { 
         VacuumViewModel(
             cleanRoomUseCase = appContainer.cleanRoomUseCase,
-            getVacuumPropertiesUseCase = appContainer.getVacuumPropertiesUseCase
+            getVacuumPropertiesUseCase = appContainer.getVacuumPropertiesUseCase,
+            getVacuumTelemetryUseCase = appContainer.getVacuumTelemetryUseCase,
+            getRoomsUseCase = appContainer.getRoomsUseCase
         )
     }
     

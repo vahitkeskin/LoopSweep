@@ -4,6 +4,8 @@ import com.vahitkeskin.loopsweep.data.repository.VacuumRepositoryImpl
 import com.vahitkeskin.loopsweep.domain.repository.VacuumRepository
 import com.vahitkeskin.loopsweep.domain.usecase.CleanRoomUseCase
 import com.vahitkeskin.loopsweep.domain.usecase.GetVacuumPropertiesUseCase
+import com.vahitkeskin.loopsweep.domain.usecase.GetVacuumTelemetryUseCase
+import com.vahitkeskin.loopsweep.domain.usecase.GetRoomsUseCase
 
 class AppContainer {
     val vacuumRepository: VacuumRepository by lazy {
@@ -16,5 +18,13 @@ class AppContainer {
     
     val getVacuumPropertiesUseCase: GetVacuumPropertiesUseCase by lazy {
         GetVacuumPropertiesUseCase(vacuumRepository)
+    }
+
+    val getVacuumTelemetryUseCase: GetVacuumTelemetryUseCase by lazy {
+        GetVacuumTelemetryUseCase(vacuumRepository)
+    }
+
+    val getRoomsUseCase: GetRoomsUseCase by lazy {
+        GetRoomsUseCase(vacuumRepository)
     }
 }

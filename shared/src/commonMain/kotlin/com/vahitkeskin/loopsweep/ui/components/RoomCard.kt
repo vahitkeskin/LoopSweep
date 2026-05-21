@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextOverflow
 import com.vahitkeskin.loopsweep.domain.model.RoomItem
 
 @Composable
@@ -126,12 +127,37 @@ fun RoomCard(
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
-                    Text(
-                        text = "ID: ${room.id}",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White.copy(alpha = 0.4f)
-                    )
+                    // Premium glassmorphic badge — different for all-areas vs specific area
+                    val idStr = room.id.toString()
+                    val compactId = if (room.isAllAreas) "🏠 TÜM" else if (idStr.length > 6) "…${idStr.takeLast(6)}" else idStr
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(
+                                        room.gradientColors[0].copy(alpha = 0.30f),
+                                        room.gradientColors.last().copy(alpha = 0.15f)
+                                    )
+                                )
+                            )
+                            .border(
+                                0.5.dp,
+                                room.gradientColors[0].copy(alpha = 0.55f),
+                                RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = compactId,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = room.gradientColors[0].copy(alpha = 0.95f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Clip
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
