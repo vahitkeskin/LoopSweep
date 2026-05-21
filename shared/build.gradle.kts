@@ -73,6 +73,7 @@ kotlin {
     sourceSets {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
+            implementation(libs.timber)
         }
         commonMain {
             kotlin.srcDir(generateBuildConfig)

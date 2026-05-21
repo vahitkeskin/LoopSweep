@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vahitkeskin.loopsweep.BuildConfig
 import com.vahitkeskin.loopsweep.domain.usecase.CleanRoomUseCase
+import com.vahitkeskin.loopsweep.utils.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -36,7 +37,9 @@ class VacuumViewModel(private val cleanRoomUseCase: CleanRoomUseCase) : ViewMode
                     _statusMessage.value = "Komut başarıyla gönderildi: Oda $roomId, Döngü: $repeats"
                 },
                 onFailure = { error ->
-                    _statusMessage.value = "Hata: ${error.message ?: "Bilinmeyen Bağlantı Hatası"}"
+                    val msg = "Hata: ${error.message ?: "Bilinmeyen Bağlantı Hatası"}"
+                    _statusMessage.value = msg
+                    Logger.e("VacuumViewModel", msg, error)
                 }
             )
             _isLoading.value = false

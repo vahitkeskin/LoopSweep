@@ -13,6 +13,8 @@ import com.vahitkeskin.loopsweep.utils.hexToByteArray
 import com.vahitkeskin.loopsweep.utils.readInt32BE
 import com.vahitkeskin.loopsweep.utils.Constants
 
+import com.vahitkeskin.loopsweep.utils.Logger
+
 object VacuumClient {
     private suspend fun sendUdp(host: String, port: Int, requestBytes: ByteArray, timeoutMs: Long = 2000): ByteArray? {
         return withContext(Dispatchers.Default) {
@@ -27,6 +29,7 @@ object VacuumClient {
                     response.packet.readBytes()
                 }
             } catch (e: Exception) {
+                Logger.e("VacuumClient", "UDP Error (host=$host, port=$port): ${e.message}", e)
                 null
             } finally {
                 socket.close()
@@ -89,12 +92,17 @@ object VacuumClient {
             val deviceId = helloResponse.copyOfRange(8, 12)
             val stamp = helloResponse.readInt32BE(12)
             
+            val deviceIdLong = (helloResponse.readInt32BE(8).toLong()) and 0xFFFFFFFFL
+            val didStr = deviceIdLong.toString()
+            Logger.i("VacuumClient", "Handshake success: did=$didStr, stamp=$stamp")
+            
             // Key / IV derivation
             val key = MD5.hash(tokenBytes)
             val iv = MD5.hash(key + tokenBytes)
             
-            // Step 2: Encrypt Payload
-            val jsonPayload = "{\"id\":1,\"method\":\"app_segment_clean\",\"params\":[$roomId,$repeats]}"
+            // Step 2: Encrypt Payload (MIoT Action: Service ID 2, Action ID 6: start-room-sweep)
+            val jsonPayload = "{\"id\":1,\"method\":\"action\",\"params\":{\"did\":\"$didStr\",\"siid\":2,\"aiid\":6,\"in\":[\"$roomId\"]}}"
+            Logger.i("VacuumClient", "Sending payload: $jsonPayload")
             val payloadBytes = jsonPayload.encodeToByteArray()
             val encryptedPayload = encryptAes128Cbc(payloadBytes, key, iv)
             
@@ -111,10 +119,12 @@ object VacuumClient {
             
             val encryptedResponsePayload = responsePacket.copyOfRange(32, responsePacket.size)
             if (encryptedResponsePayload.isEmpty()) {
+                Logger.i("VacuumClient", "Command ACK received (empty payload)")
                 Result.success("Success (Ack)")
             } else {
                 val decryptedResponsePayload = decryptAes128Cbc(encryptedResponsePayload, key, iv)
                 val responseString = decryptedResponsePayload.decodeToString()
+                Logger.i("VacuumClient", "Decrypted response: $responseString")
                 
                 if (responseString.contains("\"result\":") || responseString.lowercase().contains("ok")) {
                     Result.success(responseString)
