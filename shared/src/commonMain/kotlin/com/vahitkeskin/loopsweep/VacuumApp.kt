@@ -82,7 +82,7 @@ fun VacuumApp() {
                 }
             )
         },
-        containerColor = Color.Transparent
+        containerColor = Color(0xFF0A0F1D)
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -246,13 +246,13 @@ fun GlassmorphicBottomNavigation(
             .height(outerHeight),
         contentAlignment = Alignment.BottomCenter
     ) {
-        // 1. White bottom bar background with CutoutShape
+        // 1. Dark bottom bar background with CutoutShape (matching screen background)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(barHeight)
                 .background(
-                    color = Color.White,
+                    color = Color(0xFF0A0F1D),
                     shape = CutoutShape()
                 )
                 .border(
