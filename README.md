@@ -2,13 +2,14 @@
   <h1>🧹 LoopSweep</h1>
   <p><strong>A Next-Generation, Beautifully Crafted Robot Vacuum Controller built with Compose Multiplatform.</strong></p>
 
-  <table align="center" style="border-collapse: collapse; border: none; margin: 20px 0;">
-    <tr style="border: none;">
-      <td align="center" style="border: none; padding: 20px 40px;">
+  <table align="center" border="0" style="border-collapse: collapse; border: none; margin: 20px 0;">
+    <tr style="border: none; background-color: transparent;">
+      <td align="center" style="border: none; border-color: transparent; background-color: #2C313A; padding: 20px 40px; border-radius: 16px;">
         <img src="shared/src/commonMain/composeResources/files/robot_animated.gif" alt="LoopSweep Cleaning State" width="180" height="180" /><br/>
         <img src="https://img.shields.io/badge/▶_CLEANING-10B981?style=for-the-badge" alt="Cleaning State" style="margin-top: 10px;" />
       </td>
-      <td align="center" style="border: none; padding: 20px 40px;">
+      <td style="width: 40px; border: none; border-color: transparent; background-color: transparent;"></td>
+      <td align="center" style="border: none; border-color: transparent; background-color: #2C313A; padding: 20px 40px; border-radius: 16px;">
         <img src="shared/src/commonMain/composeResources/files/robot_static.png" alt="LoopSweep Paused State" width="180" height="180" /><br/>
         <img src="https://img.shields.io/badge/⏸_PAUSED-222222?style=for-the-badge" alt="Paused State" style="margin-top: 10px;" />
       </td>
