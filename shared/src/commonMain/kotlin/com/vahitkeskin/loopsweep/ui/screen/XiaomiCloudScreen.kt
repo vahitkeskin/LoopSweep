@@ -1,5 +1,7 @@
 package com.vahitkeskin.loopsweep.ui.screen
 
+import com.vahitkeskin.loopsweep.ui.theme.*
+
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -61,9 +63,9 @@ fun XiaomiCloudScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF0F0C20),
-                        Color(0xFF15102A),
-                        Color(0xFF06040A)
+                        DeepPurpleBg,
+                        DeepPurpleCard,
+                        DeepPurpleDarkBg
                     )
                 )
             )
@@ -74,7 +76,7 @@ fun XiaomiCloudScreen(
                 .size(300.dp)
                 .align(Alignment.TopEnd)
                 .offset(x = 100.dp, y = (-50).dp)
-                .background(Color(0x0C8B5CF6), shape = RoundedCornerShape(150.dp))
+                .background(TranslucentPurple0C, shape = RoundedCornerShape(150.dp))
                 .blur(50.dp)
         )
         Box(
@@ -82,7 +84,7 @@ fun XiaomiCloudScreen(
                 .size(250.dp)
                 .align(Alignment.BottomStart)
                 .offset(x = (-80).dp, y = 80.dp)
-                .background(Color(0x0C3B82F6), shape = RoundedCornerShape(125.dp))
+                .background(TranslucentBlue0C, shape = RoundedCornerShape(125.dp))
                 .blur(50.dp)
         )
 
@@ -132,7 +134,7 @@ fun XiaomiCloudScreen(
                         text = "Aktif Süpürge Bağlantısı",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFFA78BFA)
+                        color = LavenderPurple
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(
@@ -165,9 +167,9 @@ fun XiaomiCloudScreen(
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = when {
-                            error != null -> Color(0x26EF4444)
-                            isLoading -> Color(0x1F3B82F6)
-                            else -> Color(0x1F10B981)
+                            error != null -> TranslucentRed26
+                            isLoading -> TranslucentBlue1F
+                            else -> TranslucentGreen1F
                         }
                     ),
                     modifier = Modifier
@@ -176,9 +178,9 @@ fun XiaomiCloudScreen(
                         .border(
                             1.dp,
                             when {
-                                error != null -> Color(0xFFEF4444).copy(alpha = 0.5f)
-                                isLoading -> Color(0xFF3B82F6).copy(alpha = 0.5f)
-                                else -> Color(0xFF10B981).copy(alpha = 0.5f)
+                                error != null -> AlertRed.copy(alpha = 0.5f)
+                                isLoading -> ThemeBlue.copy(alpha = 0.5f)
+                                else -> EmeraldGreen.copy(alpha = 0.5f)
                             },
                             RoundedCornerShape(12.dp)
                         )
@@ -189,7 +191,7 @@ fun XiaomiCloudScreen(
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(
-                                color = Color(0xFF3B82F6),
+                                color = ThemeBlue,
                                 modifier = Modifier.size(24.dp).padding(end = 12.dp),
                                 strokeWidth = 2.5.dp
                             )
@@ -258,7 +260,7 @@ fun XiaomiCloudScreen(
                 indicator = { tabPositions ->
                     TabRowDefaults.Indicator(
                         modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
-                        color = Color(0xFF8B5CF6),
+                        color = MediumPurple,
                         height = 3.dp
                     )
                 },
@@ -306,9 +308,9 @@ fun XiaomiCloudScreen(
                                 onValueChange = { viewModel.username.value = it },
                                 label = { Text("E-posta, Telefon veya Mi ID") },
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = Color(0xFF8B5CF6),
+                                    focusedBorderColor = MediumPurple,
                                     unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
-                                    focusedLabelColor = Color(0xFF8B5CF6),
+                                    focusedLabelColor = MediumPurple,
                                     unfocusedLabelColor = Color.Gray,
                                     focusedTextColor = Color.White,
                                     unfocusedTextColor = Color.White
@@ -325,9 +327,9 @@ fun XiaomiCloudScreen(
                                 onValueChange = { viewModel.password.value = it },
                                 label = { Text("Şifre") },
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = Color(0xFF8B5CF6),
+                                    focusedBorderColor = MediumPurple,
                                     unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
-                                    focusedLabelColor = Color(0xFF8B5CF6),
+                                    focusedLabelColor = MediumPurple,
                                     unfocusedLabelColor = Color.Gray,
                                     focusedTextColor = Color.White,
                                     unfocusedTextColor = Color.White
@@ -352,9 +354,9 @@ fun XiaomiCloudScreen(
                                     readOnly = true,
                                     label = { Text("Mi Home Sunucu Bölgesi") },
                                     colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = Color(0xFF8B5CF6),
+                                        focusedBorderColor = MediumPurple,
                                         unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
-                                        focusedLabelColor = Color(0xFF8B5CF6),
+                                        focusedLabelColor = MediumPurple,
                                         unfocusedLabelColor = Color.Gray,
                                         focusedTextColor = Color.White,
                                         unfocusedTextColor = Color.White
@@ -382,7 +384,7 @@ fun XiaomiCloudScreen(
                                     onDismissRequest = { regionDropdownExpanded = false },
                                     modifier = Modifier
                                         .fillMaxWidth(0.85f)
-                                        .background(Color(0xFF1E1B3A))
+                                        .background(PurpleGrayBg)
                                 ) {
                                     viewModel.regionsList.forEach { reg ->
                                         DropdownMenuItem(
@@ -400,7 +402,7 @@ fun XiaomiCloudScreen(
                             Button(
                                 onClick = { viewModel.loginAndFetchDevices() },
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF8B5CF6)
+                                    containerColor = MediumPurple
                                 ),
                                 shape = RoundedCornerShape(10.dp),
                                 modifier = Modifier
@@ -443,7 +445,7 @@ fun XiaomiCloudScreen(
                                 onValueChange = { viewModel.manualUserId.value = it },
                                 label = { Text("Mi Account UserId") },
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = Color(0xFF8B5CF6),
+                                    focusedBorderColor = MediumPurple,
                                     unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
                                     focusedTextColor = Color.White,
                                     unfocusedTextColor = Color.White
@@ -458,7 +460,7 @@ fun XiaomiCloudScreen(
                                 onValueChange = { viewModel.manualServiceToken.value = it },
                                 label = { Text("serviceToken (xiaomiio)") },
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = Color(0xFF8B5CF6),
+                                    focusedBorderColor = MediumPurple,
                                     unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
                                     focusedTextColor = Color.White,
                                     unfocusedTextColor = Color.White
@@ -473,7 +475,7 @@ fun XiaomiCloudScreen(
                                 onValueChange = { viewModel.manualSsecurity.value = it },
                                 label = { Text("ssecurity") },
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = Color(0xFF8B5CF6),
+                                    focusedBorderColor = MediumPurple,
                                     unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
                                     focusedTextColor = Color.White,
                                     unfocusedTextColor = Color.White
@@ -487,7 +489,7 @@ fun XiaomiCloudScreen(
                             Button(
                                 onClick = { viewModel.fetchDevicesWithManualTokens() },
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF10B981)
+                                    containerColor = EmeraldGreen
                                 ),
                                 shape = RoundedCornerShape(10.dp),
                                 modifier = Modifier
@@ -533,7 +535,7 @@ fun XiaomiCloudScreen(
                                 onValueChange = { directIp = it },
                                 label = { Text("Robot Yerel IP Adresi") },
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = Color(0xFF8B5CF6),
+                                    focusedBorderColor = MediumPurple,
                                     unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
                                     focusedTextColor = Color.White,
                                     unfocusedTextColor = Color.White
@@ -549,7 +551,7 @@ fun XiaomiCloudScreen(
                                 onValueChange = { directToken = it },
                                 label = { Text("32 Karakterli Hex Token") },
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = Color(0xFF8B5CF6),
+                                    focusedBorderColor = MediumPurple,
                                     unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
                                     focusedTextColor = Color.White,
                                     unfocusedTextColor = Color.White
@@ -571,7 +573,7 @@ fun XiaomiCloudScreen(
                                     }
                                 },
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF8B5CF6)
+                                    containerColor = MediumPurple
                                 ),
                                 shape = RoundedCornerShape(10.dp),
                                 modifier = Modifier
@@ -619,7 +621,7 @@ fun DeviceRow(
                     modifier = Modifier
                         .size(8.dp)
                         .background(
-                            color = if (device.isOnline) Color(0xFF10B981) else Color(0xFFEF4444),
+                            color = if (device.isOnline) EmeraldGreen else AlertRed,
                             shape = RoundedCornerShape(4.dp)
                         )
                 )
@@ -639,16 +641,16 @@ fun DeviceRow(
         Button(
             onClick = onSelect,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF8B5CF6).copy(alpha = 0.2f)
+                containerColor = MediumPurple.copy(alpha = 0.2f)
             ),
-            border = BorderStroke(1.dp, Color(0xFF8B5CF6).copy(alpha = 0.6f)),
+            border = BorderStroke(1.dp, MediumPurple.copy(alpha = 0.6f)),
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier.height(32.dp)
         ) {
             Text(
                 text = "Seç",
-                color = Color(0xFFC084FC),
+                color = BrightPurple,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
             )

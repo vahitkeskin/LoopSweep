@@ -1,5 +1,7 @@
 package com.vahitkeskin.loopsweep.presentation
 
+import com.vahitkeskin.loopsweep.ui.theme.*
+
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -209,14 +211,14 @@ class VacuumViewModel(
             onSuccess = { pairs ->
                 if (pairs.isNotEmpty()) {
                     val roomColors = listOf(
-                        listOf(Color(0xFFEC4899), Color(0xFFF43F5E)),
-                        listOf(Color(0xFF8B5CF6), Color(0xFF6366F1)),
-                        listOf(Color(0xFFF59E0B), Color(0xFFD97706)),
-                        listOf(Color(0xFF06B6D4), Color(0xFF0891B2)),
-                        listOf(Color(0xFF10B981), Color(0xFF059669)),
-                        listOf(Color(0xFF3B82F6), Color(0xFF2563EB)),
-                        listOf(Color(0xFFF97316), Color(0xFFEA580C)),
-                        listOf(Color(0xFF84CC16), Color(0xFF65A30D))
+                        listOf(ThemePink, ThemeRose),
+                        listOf(MediumPurple, ThemeIndigo),
+                        listOf(ThemeOrange, DarkAmber),
+                        listOf(ThemeCyan, DarkCyan),
+                        listOf(EmeraldGreen, DarkGreen),
+                        listOf(ThemeBlue, DarkBlue),
+                        listOf(BrightOrange, VibrantOrange),
+                        listOf(LimeGreen, DarkLimeGreen)
                     )
                     // Icons indexed: first entry is always "Tüm ev" (all home)
                     val roomIcons = listOf("🏠", "🛋️", "🛏️", "🍳", "🛁", "🧹", "💻", "🪴", "🚿")
@@ -232,7 +234,7 @@ class VacuumViewModel(
                                 name = name,
                                 icon = roomIcons.getOrElse(index) { "🏠" },
                                 gradientColors = roomColors.getOrElse(index) {
-                                    listOf(Color(0xFF6366F1), Color(0xFF4F46E5))
+                                    listOf(ThemeIndigo, DarkIndigo)
                                 },
                                 isAllAreas = isAllHome
                             )
@@ -248,7 +250,7 @@ class VacuumViewModel(
                                 name = defaultRoom.name,
                                 icon = defaultRoom.icon,
                                 gradientColors = roomColors.getOrElse(colorIdx) {
-                                    listOf(Color(0xFF6366F1), Color(0xFF4F46E5))
+                                    listOf(ThemeIndigo, DarkIndigo)
                                 },
                                 isAllAreas = false
                             )

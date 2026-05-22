@@ -1,5 +1,7 @@
 package com.vahitkeskin.loopsweep.ui.components
 
+import com.vahitkeskin.loopsweep.ui.theme.*
+
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -126,14 +128,14 @@ fun RobotVacuumButtonContent(
 
             if (isCleaning) {
                 drawCircle(
-                    color = Color(0xFF10B981).copy(alpha = 0.6f * powerLedAlpha),
+                    color = EmeraldGreen.copy(alpha = 0.6f * powerLedAlpha),
                     radius = 2.dp.toPx(),
                     center = Offset(cx, cy - r * 0.58f)
                 )
             }
             if (isCharging) {
                 drawCircle(
-                    color = Color(0xFFFBBF24).copy(alpha = 0.6f * chargeLedAlpha),
+                    color = AmberYellow.copy(alpha = 0.6f * chargeLedAlpha),
                     radius = 2.dp.toPx(),
                     center = Offset(cx, cy - r * 0.45f)
                 )
@@ -159,7 +161,7 @@ fun RobotVacuumButtonContentPreview() {
     Box(
         modifier = Modifier
             .size(100.dp)
-            .background(Color(0xFF0A0F1D)),
+            .background(SpaceDarkBg),
         contentAlignment = Alignment.Center
     ) {
         RobotVacuumButtonContent(

@@ -1,5 +1,7 @@
 package com.vahitkeskin.loopsweep.ui.components
 
+import com.vahitkeskin.loopsweep.ui.theme.*
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
 import androidx.compose.animation.expandVertically
@@ -47,7 +49,7 @@ fun RealisticRadarCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .background(Color(0xFF0F172A).copy(alpha = 0.35f)) // Glassmorphic background
+            .background(SlateNavy.copy(alpha = 0.35f)) // Glassmorphic background
             .border(
                 1.dp,
                 Brush.verticalGradient(
@@ -75,7 +77,7 @@ fun RealisticRadarCard(
                     modifier = Modifier
                         .size(8.dp)
                         .clip(RoundedCornerShape(50))
-                        .background(Color(0xFF10B981))
+                        .background(EmeraldGreen)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -91,7 +93,7 @@ fun RealisticRadarCard(
                 text = if (isVisible) "RADARI GİZLE ▲" else "RADARI GÖSTER ▼",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF10B981),
+                color = EmeraldGreen,
                 letterSpacing = 1.sp
             )
         }
@@ -157,8 +159,8 @@ fun RealisticRadarDisplay(
             .fillMaxWidth()
             .height(280.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFF070B14)) // Deep space radar scope background
-            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(16.dp)),
+            .background(DeepNavyDark) // Deep space radar scope background
+            .border(1.dp, SlateBlueGray, RoundedCornerShape(16.dp)),
         contentAlignment = Alignment.Center
     ) {
         Canvas(
@@ -178,14 +180,14 @@ fun RealisticRadarDisplay(
             for (i in 1 until cellCount) {
                 // Vertical grid lines
                 drawLine(
-                    color = Color(0xFF111827).copy(alpha = 0.4f),
+                    color = DarkGray.copy(alpha = 0.4f),
                     start = Offset(i * cellWidth, 0f),
                     end = Offset(i * cellWidth, height),
                     strokeWidth = 1f
                 )
                 // Horizontal grid lines
                 drawLine(
-                    color = Color(0xFF111827).copy(alpha = 0.4f),
+                    color = DarkGray.copy(alpha = 0.4f),
                     start = Offset(0f, i * cellHeight),
                     end = Offset(width, i * cellHeight),
                     strokeWidth = 1f
@@ -218,7 +220,7 @@ fun RealisticRadarDisplay(
                     center.y + maxRadius * sin(rad).toFloat()
                 )
                 drawLine(
-                    color = Color(0xFF10B981).copy(alpha = 0.08f),
+                    color = EmeraldGreen.copy(alpha = 0.08f),
                     start = start,
                     end = end,
                     strokeWidth = 1f
@@ -238,7 +240,7 @@ fun RealisticRadarDisplay(
                     center.y + (maxRadius + tickLength + 2f) * sin(rad).toFloat()
                 )
                 drawLine(
-                    color = Color(0xFF10B981).copy(alpha = if (degree % 30 == 0) 0.5f else 0.25f),
+                    color = EmeraldGreen.copy(alpha = if (degree % 30 == 0) 0.5f else 0.25f),
                     start = innerOffset,
                     end = outerOffset,
                     strokeWidth = if (degree % 30 == 0) 1.5f else 1f
@@ -249,7 +251,7 @@ fun RealisticRadarDisplay(
             val sonarRadius = maxRadius * sonarPulseProgress
             val sonarAlpha = 0.25f * (1.0f - sonarPulseProgress)
             drawCircle(
-                color = Color(0xFF06B6D4).copy(alpha = sonarAlpha),
+                color = ThemeCyan.copy(alpha = sonarAlpha),
                 center = center,
                 radius = sonarRadius,
                 style = Stroke(width = 2f)
@@ -278,9 +280,9 @@ fun RealisticRadarDisplay(
                 brush = Brush.sweepGradient(
                     colorStops = arrayOf(
                         0f to Color.Transparent,
-                        0.75f to Color(0xFF10B981).copy(alpha = 0.01f),
-                        0.95f to Color(0xFF10B981).copy(alpha = 0.15f),
-                        1f to Color(0xFF10B981).copy(alpha = 0.45f)
+                        0.75f to EmeraldGreen.copy(alpha = 0.01f),
+                        0.95f to EmeraldGreen.copy(alpha = 0.15f),
+                        1f to EmeraldGreen.copy(alpha = 0.45f)
                     ),
                     center = center
                 )
@@ -294,19 +296,19 @@ fun RealisticRadarDisplay(
             )
             // Sweep line glow
             drawLine(
-                color = Color(0xFF10B981).copy(alpha = 0.8f),
+                color = EmeraldGreen.copy(alpha = 0.8f),
                 start = center,
                 end = lineEnd,
                 strokeWidth = 2.5f
             )
             // Center hub dot
             drawCircle(
-                color = Color(0xFF10B981),
+                color = EmeraldGreen,
                 center = center,
                 radius = 4f
             )
             drawCircle(
-                color = Color(0xFF10B981).copy(alpha = 0.3f),
+                color = EmeraldGreen.copy(alpha = 0.3f),
                 center = center,
                 radius = 8f,
                 style = Stroke(width = 1.5f)
@@ -340,13 +342,13 @@ fun RealisticRadarDisplay(
                 if (isActive && blipAlpha > 0.02f) {
                     // 1. Draw glowing outer halo
                     drawCircle(
-                        color = Color(0xFFEF4444).copy(alpha = blipAlpha * 0.2f),
+                        color = AlertRed.copy(alpha = blipAlpha * 0.2f),
                         center = targetPos,
                         radius = target.size * 2.2f
                     )
                     // 2. Draw blip center dot
                     drawCircle(
-                        color = Color(0xFFEF4444).copy(alpha = blipAlpha),
+                        color = AlertRed.copy(alpha = blipAlpha),
                         center = targetPos,
                         radius = target.size * 0.7f
                     )
@@ -356,20 +358,20 @@ fun RealisticRadarDisplay(
                     if (target.desc == "MASA-AYAK" && blipAlpha > 0.4f) {
                         val lockRatio = (1.0f - blipAlpha) * 15f
                         drawCircle(
-                            color = Color(0xFF06B6D4).copy(alpha = blipAlpha * 0.7f),
+                            color = ThemeCyan.copy(alpha = blipAlpha * 0.7f),
                             center = targetPos,
                             radius = target.size * 1.5f + lockRatio,
                             style = Stroke(width = 1f)
                         )
                         // Target lock lines
                         drawLine(
-                            color = Color(0xFF06B6D4).copy(alpha = blipAlpha),
+                            color = ThemeCyan.copy(alpha = blipAlpha),
                             start = Offset(targetPos.x - 12f, targetPos.y),
                             end = Offset(targetPos.x + 12f, targetPos.y),
                             strokeWidth = 1f
                         )
                         drawLine(
-                            color = Color(0xFF06B6D4).copy(alpha = blipAlpha),
+                            color = ThemeCyan.copy(alpha = blipAlpha),
                             start = Offset(targetPos.x, targetPos.y - 12f),
                             end = Offset(targetPos.x, targetPos.y + 12f),
                             strokeWidth = 1f
@@ -405,7 +407,7 @@ fun RealisticRadarDisplay(
             val batteryLevel = telemetry?.batteryLevel ?: 0
             HudText("BATTERY: $batteryLevel%")
             val targetsCount = if (isActive) "5 ACTIVE" else "0 STANDBY"
-            val targetsColor = if (isActive) Color(0xFFEF4444) else Color(0xFF10B981).copy(alpha = 0.8f)
+            val targetsColor = if (isActive) AlertRed else EmeraldGreen.copy(alpha = 0.8f)
             HudText("OBSTACLES: $targetsCount", color = targetsColor)
         }
 
@@ -424,7 +426,7 @@ fun RealisticRadarDisplay(
             }
             Text(
                 text = bottomStatusText,
-                color = Color(0xFF10B981).copy(alpha = 0.7f),
+                color = EmeraldGreen.copy(alpha = 0.7f),
                 fontSize = 9.sp,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold
@@ -434,7 +436,7 @@ fun RealisticRadarDisplay(
 }
 
 @Composable
-fun HudText(text: String, color: Color = Color(0xFF10B981).copy(alpha = 0.8f)) {
+fun HudText(text: String, color: Color = EmeraldGreen.copy(alpha = 0.8f)) {
     Text(
         text = text,
         color = color,

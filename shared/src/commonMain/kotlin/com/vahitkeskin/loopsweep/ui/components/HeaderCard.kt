@@ -1,5 +1,7 @@
 package com.vahitkeskin.loopsweep.ui.components
 
+import com.vahitkeskin.loopsweep.ui.theme.*
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -54,7 +56,7 @@ fun HeaderCard(
                     color = Color.White,
                     style = TextStyle(
                         shadow = Shadow(
-                            color = Color(0xFF8B5CF6).copy(alpha = 0.8f),
+                            color = MediumPurple.copy(alpha = 0.8f),
                             offset = Offset(0f, 0f),
                             blurRadius = 10f
                         )
@@ -71,7 +73,7 @@ fun HeaderCard(
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = Color(0xFF06B6D4),
+                        color = ThemeCyan,
                         strokeWidth = 2.dp
                     )
                 }
@@ -93,7 +95,7 @@ fun HeaderCard(
                         disabledContainerColor = Color.Transparent,
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedIndicatorColor = Color(0xFF8B5CF6),
+                        focusedIndicatorColor = MediumPurple,
                         unfocusedIndicatorColor = Color.White.copy(alpha = 0.1f)
                     ),
                     modifier = Modifier
@@ -111,7 +113,7 @@ fun HeaderCard(
                         disabledContainerColor = Color.Transparent,
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedIndicatorColor = Color(0xFF8B5CF6),
+                        focusedIndicatorColor = MediumPurple,
                         unfocusedIndicatorColor = Color.White.copy(alpha = 0.1f)
                     ),
                     modifier = Modifier

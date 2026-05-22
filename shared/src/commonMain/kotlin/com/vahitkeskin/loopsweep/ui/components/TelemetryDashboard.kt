@@ -1,5 +1,7 @@
 package com.vahitkeskin.loopsweep.ui.components
 
+import com.vahitkeskin.loopsweep.ui.theme.*
+
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -77,7 +79,7 @@ fun TelemetryDashboard(
                 Button(
                     onClick = { activeTab = index },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selected) Color(0xFF6366F1) else Color.Transparent,
+                        containerColor = if (selected) ThemeIndigo else Color.Transparent,
                         contentColor = if (selected) Color.White else Color.White.copy(alpha = 0.6f)
                     ),
                     shape = RoundedCornerShape(8.dp),
@@ -127,7 +129,7 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
             .fillMaxWidth()
             .height(240.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFF070B16))
+            .background(DeepSpaceNavy)
             .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
     ) {
         // Simulated Radar Sweep Angle
@@ -161,7 +163,7 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
             for (x in 0..(width / gridSize).toInt()) {
                 val dx = x * gridSize
                 drawLine(
-                    color = Color(0xFF0F172A),
+                    color = SlateNavy,
                     start = Offset(dx, 0f),
                     end = Offset(dx, height),
                     strokeWidth = 1f
@@ -170,7 +172,7 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
             for (y in 0..(height / gridSize).toInt()) {
                 val dy = y * gridSize
                 drawLine(
-                    color = Color(0xFF0F172A),
+                    color = SlateNavy,
                     start = Offset(0f, dy),
                     end = Offset(width, dy),
                     strokeWidth = 1f
@@ -180,19 +182,19 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
             // Draw concentric radar circles
             val maxRadius = minOf(width, height) * 0.45f
             drawCircle(
-                color = Color(0xFF10B981).copy(alpha = 0.05f),
+                color = EmeraldGreen.copy(alpha = 0.05f),
                 center = center,
                 radius = maxRadius,
                 style = Stroke(width = 1f)
             )
             drawCircle(
-                color = Color(0xFF10B981).copy(alpha = 0.08f),
+                color = EmeraldGreen.copy(alpha = 0.08f),
                 center = center,
                 radius = maxRadius * 0.66f,
                 style = Stroke(width = 1f)
             )
             drawCircle(
-                color = Color(0xFF10B981).copy(alpha = 0.1f),
+                color = EmeraldGreen.copy(alpha = 0.1f),
                 center = center,
                 radius = maxRadius * 0.33f,
                 style = Stroke(width = 1f)
@@ -206,7 +208,7 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
             )
             drawLine(
                 brush = Brush.linearGradient(
-                    colors = listOf(Color(0xFF10B981).copy(alpha = 0.8f), Color.Transparent),
+                    colors = listOf(EmeraldGreen.copy(alpha = 0.8f), Color.Transparent),
                     start = center,
                     end = lineEnd
                 ),
@@ -230,7 +232,7 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
             }
             drawPath(
                 path = wallPath,
-                color = Color(0xFF06B6D4).copy(alpha = 0.3f),
+                color = ThemeCyan.copy(alpha = 0.3f),
                 style = Stroke(width = 2.5f)
             )
 
@@ -242,12 +244,12 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
             )
             obstacles.forEach { obstacle ->
                 drawCircle(
-                    color = Color(0xFFEF4444).copy(alpha = 0.15f),
+                    color = AlertRed.copy(alpha = 0.15f),
                     center = obstacle,
                     radius = 12f
                 )
                 drawCircle(
-                    color = Color(0xFFEF4444),
+                    color = AlertRed,
                     center = obstacle,
                     radius = 4f
                 )
@@ -278,19 +280,19 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
                 // Draw path line in amber
                 drawPath(
                     path = cleanPath,
-                    color = Color(0xFFF59E0B).copy(alpha = 0.6f),
+                    color = ThemeOrange.copy(alpha = 0.6f),
                     style = Stroke(width = 3f)
                 )
 
                 // Draw current robot position (vacuum indicator)
                 val robotPos = points[pathToShowCount - 1]
                 drawCircle(
-                    color = Color(0xFFF59E0B).copy(alpha = 0.25f),
+                    color = ThemeOrange.copy(alpha = 0.25f),
                     center = robotPos,
                     radius = 15f
                 )
                 drawCircle(
-                    color = Color(0xFFF59E0B),
+                    color = ThemeOrange,
                     center = robotPos,
                     radius = 6f
                 )
@@ -298,12 +300,12 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
                 // Idle position at dock (center-bottom)
                 val dockPos = Offset(center.x, center.y + 110f)
                 drawCircle(
-                    color = Color(0xFF3B82F6).copy(alpha = 0.3f),
+                    color = ThemeBlue.copy(alpha = 0.3f),
                     center = dockPos,
                     radius = 12f
                 )
                 drawCircle(
-                    color = Color(0xFF3B82F6),
+                    color = ThemeBlue,
                     center = dockPos,
                     radius = 5f
                 )
@@ -326,7 +328,7 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = if (isCleaning) "🔴 CANLI TARAMA AKTİF" else "⚪ HARİTA BEKLEMEDE",
-                color = if (isCleaning) Color(0xFFEF4444) else Color.White.copy(alpha = 0.7f),
+                color = if (isCleaning) AlertRed else Color.White.copy(alpha = 0.7f),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -424,7 +426,7 @@ fun TabDetailedTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
                 label = "Emiş Gücü Kademesi (Vakum Motor Hızı)",
                 activeSegments = suctionVal.coerceIn(1, 4),
                 totalSegments = 4,
-                activeColor = Color(0xFF8B5CF6)
+                activeColor = MediumPurple
             )
 
             val waterVal = (telemetry?.waterState ?: 1) + 1
@@ -432,7 +434,7 @@ fun TabDetailedTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
                 label = "Su Pompası Debisi (Paspas Islaklığı)",
                 activeSegments = waterVal.coerceIn(1, 3),
                 totalSegments = 3,
-                activeColor = Color(0xFF06B6D4)
+                activeColor = ThemeCyan
             )
         }
     }
@@ -509,8 +511,8 @@ fun FaultAlertCard(faultCode: Int) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFFEF4444).copy(alpha = 0.15f * warningAlpha))
-            .border(1.dp, Color(0xFFEF4444).copy(alpha = 0.4f * warningAlpha), RoundedCornerShape(12.dp))
+            .background(AlertRed.copy(alpha = 0.15f * warningAlpha))
+            .border(1.dp, AlertRed.copy(alpha = 0.4f * warningAlpha), RoundedCornerShape(12.dp))
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -522,7 +524,7 @@ fun FaultAlertCard(faultCode: Int) {
         Column {
             Text(
                 text = "CİHAZ UYARISI / HATA BİLDİRİMİ",
-                color = Color(0xFFFCA5A5),
+                color = LightRed,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
@@ -609,13 +611,13 @@ fun TabCharts(batteryHistory: List<Int>, areaHistory: List<Int>) {
                         drawPath(
                             path = fillPath,
                             brush = Brush.verticalGradient(
-                                colors = listOf(Color(0xFF10B981).copy(alpha = 0.2f), Color.Transparent)
+                                colors = listOf(EmeraldGreen.copy(alpha = 0.2f), Color.Transparent)
                             )
                         )
                         // Draw line
                         drawPath(
                             path = linePath,
-                            color = Color(0xFF10B981),
+                            color = EmeraldGreen,
                             style = Stroke(width = 2.5f)
                         )
                     }
@@ -664,7 +666,7 @@ fun TabCharts(batteryHistory: List<Int>, areaHistory: List<Int>) {
 
                             drawRect(
                                 brush = Brush.verticalGradient(
-                                    colors = listOf(Color(0xFF8B5CF6), Color(0xFF6366F1))
+                                    colors = listOf(MediumPurple, ThemeIndigo)
                                 ),
                                 topLeft = Offset(rx, ry),
                                 size = Size(barWidth, cy)
@@ -703,10 +705,10 @@ fun TabLogsAndConsumables(telemetry: VacuumTelemetry?, eventLog: List<String>) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                ConsumableRing("Yan Fırça", telemetry?.sideBrushLife ?: 95, Color(0xFF06B6D4))
-                ConsumableRing("Ana Fırça", telemetry?.mainBrushLife ?: 88, Color(0xFF8B5CF6))
-                ConsumableRing("Filtre", telemetry?.filterLife ?: 92, Color(0xFFF59E0B))
-                ConsumableRing("Paspas", telemetry?.mopLife ?: 74, Color(0xFFEC4899))
+                ConsumableRing("Yan Fırça", telemetry?.sideBrushLife ?: 95, ThemeCyan)
+                ConsumableRing("Ana Fırça", telemetry?.mainBrushLife ?: 88, MediumPurple)
+                ConsumableRing("Filtre", telemetry?.filterLife ?: 92, ThemeOrange)
+                ConsumableRing("Paspas", telemetry?.mopLife ?: 74, ThemePink)
             }
         }
 
@@ -739,13 +741,13 @@ fun TabLogsAndConsumables(telemetry: VacuumTelemetry?, eventLog: List<String>) {
                     ) {
                         Text(
                             text = "⚡",
-                            color = if (logText.contains("UYARI")) Color(0xFFEF4444) else Color(0xFF6366F1),
+                            color = if (logText.contains("UYARI")) AlertRed else ThemeIndigo,
                             fontSize = 10.sp,
                             modifier = Modifier.padding(top = 2.dp, end = 6.dp)
                         )
                         Text(
                             text = logText,
-                            color = if (logText.contains("UYARI")) Color(0xFFFCA5A5) else Color.White.copy(alpha = 0.7f),
+                            color = if (logText.contains("UYARI")) LightRed else Color.White.copy(alpha = 0.7f),
                             fontSize = 11.sp,
                             lineHeight = 15.sp
                         )
@@ -776,13 +778,13 @@ fun TabRawJson(telemetry: VacuumTelemetry?) {
             )
             Text(
                 text = if (rawJson != null) "GÜNCEL" else "ÇEVRİMDIŞI",
-                color = if (rawJson != null) Color(0xFF10B981) else Color.White.copy(alpha = 0.4f),
+                color = if (rawJson != null) EmeraldGreen else Color.White.copy(alpha = 0.4f),
                 fontSize = 9.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Monospace,
                 modifier = Modifier
                     .clip(RoundedCornerShape(4.dp))
-                    .background(if (rawJson != null) Color(0xFF10B981).copy(alpha = 0.15f) else Color.White.copy(alpha = 0.05f))
+                    .background(if (rawJson != null) EmeraldGreen.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.05f))
                     .padding(horizontal = 6.dp, vertical = 2.dp)
             )
         }
@@ -792,7 +794,7 @@ fun TabRawJson(telemetry: VacuumTelemetry?) {
                 .fillMaxWidth()
                 .height(280.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFF030712)) // Darkest gray, terminal background
+                .background(JetBlack) // Darkest gray, terminal background
                 .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
                 .padding(12.dp)
         ) {
@@ -862,7 +864,7 @@ fun ConsumableRing(label: String, pct: Int, color: Color) {
                 // Percentage arc
                 val sweepAngle = (pct / 100f) * 360f
                 drawArc(
-                    color = if (pct < 20) Color(0xFFEF4444) else color,
+                    color = if (pct < 20) AlertRed else color,
                     startAngle = -90f,
                     sweepAngle = sweepAngle,
                     useCenter = false,
@@ -952,7 +954,7 @@ fun formatAndHighlightJson(json: String): AnnotatedString {
             // Check for string boundaries
             if (char == '"' && (i == 0 || json[i - 1] != '\\')) {
                 inString = !inString
-                withStyle(style = SpanStyle(color = if (isKey) Color(0xFF00E5FF) else Color(0xFFA5D6A7))) {
+                withStyle(style = SpanStyle(color = if (isKey) ElectricCyan else LightGreen)) {
                     append(char)
                 }
                 i++
@@ -960,7 +962,7 @@ fun formatAndHighlightJson(json: String): AnnotatedString {
             }
             
             if (inString) {
-                withStyle(style = SpanStyle(color = if (isKey) Color(0xFF00E5FF) else Color(0xFFA5D6A7))) {
+                withStyle(style = SpanStyle(color = if (isKey) ElectricCyan else LightGreen)) {
                     append(char)
                 }
                 i++
@@ -1011,24 +1013,24 @@ fun formatAndHighlightJson(json: String): AnnotatedString {
                             numStr += json[i]
                             i++
                         }
-                        withStyle(style = SpanStyle(color = Color(0xFFFFB74D))) {
+                        withStyle(style = SpanStyle(color = LightOrange)) {
                             append(numStr)
                         }
                         continue
                     } else if (json.startsWith("true", i)) {
-                        withStyle(style = SpanStyle(color = Color(0xFF4FC3F7))) {
+                        withStyle(style = SpanStyle(color = LightBlue)) {
                             append("true")
                         }
                         i += 4
                         continue
                     } else if (json.startsWith("false", i)) {
-                        withStyle(style = SpanStyle(color = Color(0xFFE57373))) {
+                        withStyle(style = SpanStyle(color = CoralRed)) {
                             append("false")
                         }
                         i += 5
                         continue
                     } else if (json.startsWith("null", i)) {
-                        withStyle(style = SpanStyle(color = Color(0xFFBA68C8))) {
+                        withStyle(style = SpanStyle(color = LightPurple)) {
                             append("null")
                         }
                         i += 4

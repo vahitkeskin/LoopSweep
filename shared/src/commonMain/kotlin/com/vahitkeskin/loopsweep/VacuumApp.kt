@@ -1,5 +1,7 @@
 package com.vahitkeskin.loopsweep
 
+import com.vahitkeskin.loopsweep.ui.theme.*
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -84,7 +86,7 @@ fun VacuumApp() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0A0F1D))
+            .background(SpaceDarkBg)
     ) {
         Scaffold(
             bottomBar = {
@@ -309,7 +311,7 @@ fun GlassmorphicBottomNavigation(
             }
             drawPath(
                 path = bgPath,
-                color = Color(0xFF0A0F1D)
+                color = SpaceDarkBg
             )
 
             // Draw grey line along the top profile of the cutout
@@ -360,14 +362,14 @@ fun GlassmorphicBottomNavigation(
                     modifier = Modifier.height(32.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    StatisticsIcon(color = if (currentScreen == Screen.Dashboard) Color(0xFFFBBF24) else Color(0xFF787880))
+                    StatisticsIcon(color = if (currentScreen == Screen.Dashboard) AmberYellow else SystemGray)
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "Statistics",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (currentScreen == Screen.Dashboard) Color(0xFFFBBF24) else Color(0xFF787880)
+                    color = if (currentScreen == Screen.Dashboard) AmberYellow else SystemGray
                 )
             }
 
@@ -386,7 +388,7 @@ fun GlassmorphicBottomNavigation(
                     text = "Start",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF787880)
+                    color = SystemGray
                 )
             }
 
@@ -408,14 +410,14 @@ fun GlassmorphicBottomNavigation(
                     modifier = Modifier.height(32.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    PurchaseIcon(color = if (currentScreen == Screen.Cloud) Color(0xFFFBBF24) else Color(0xFF787880))
+                    PurchaseIcon(color = if (currentScreen == Screen.Cloud) AmberYellow else SystemGray)
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "Purchase",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (currentScreen == Screen.Cloud) Color(0xFFFBBF24) else Color(0xFF787880)
+                    color = if (currentScreen == Screen.Cloud) AmberYellow else SystemGray
                 )
             }
         }
@@ -427,9 +429,10 @@ fun GlassmorphicBottomNavigation(
                 .align(Alignment.TopCenter)
                 .padding(top = 16.dp) // Slightly higher padding for visible gap from cutout
                 .size(buttonSize)
-                .combinedClickable(
-                    onClick = { onCleanClicked() },
-                    onLongClick = { showMenu = true }
+                .clickable(
+                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                    indication = null,
+                    onClick = { showMenu = !showMenu }
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -438,11 +441,13 @@ fun GlassmorphicBottomNavigation(
                 isCharging = isCharging
             )
 
-            // Long-press balloon popup
+            // Click balloon popup
             if (showMenu) {
                 VacuumControlBalloon(
                     buttonSizePx = with(LocalDensity.current) { buttonSize.roundToPx() },
+                    isCleaning = isCleaning,
                     onDismiss = { showMenu = false },
+                    onCleanClicked = { showMenu = false; onCleanClicked() },
                     onStopClicked = { showMenu = false; onStopClicked() },
                     onDockClicked = { showMenu = false; onDockClicked() }
                 )
@@ -454,13 +459,15 @@ fun GlassmorphicBottomNavigation(
 @Composable
 fun VacuumControlBalloon(
     buttonSizePx: Int,
+    isCleaning: Boolean,
     onDismiss: () -> Unit,
+    onCleanClicked: () -> Unit,
     onStopClicked: () -> Unit,
     onDockClicked: () -> Unit
 ) {
     val arrowHeightDp = 14.dp
-    val balloonColor = Color(0xFF141C30)
-    val borderColor = Color(0xFF3D4A6B)
+    val balloonColor = DarkNavy
+    val borderColor = BlueGray
 
     Popup(
         alignment = Alignment.BottomCenter,
@@ -530,26 +537,50 @@ fun VacuumControlBalloon(
                 .padding(10.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                // ⏹️ Durdur button
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(Color(0xFF7F1D1D), Color(0xFFEF4444))
-                            ),
-                            shape = RoundedCornerShape(10.dp)
+                if (isCleaning) {
+                    // ⏹️ Durdur button
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(DarkRed, AlertRed)
+                                ),
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                            .clickable { onStopClicked() }
+                            .padding(vertical = 12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "⏹️  Durdur",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
                         )
-                        .clickable { onStopClicked() }
-                        .padding(vertical = 12.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "⏹️  Durdur",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
+                    }
+                } else {
+                    // ▶️ Başlat button
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(DeepGreen, EmeraldGreen)
+                                ),
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                            .clickable { onCleanClicked() }
+                            .padding(vertical = 12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "▶️  Başlat",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
                 // 🏠 Şarj İstasyonuna Dön button
                 Box(
@@ -557,7 +588,7 @@ fun VacuumControlBalloon(
                         .fillMaxWidth()
                         .background(
                             brush = Brush.linearGradient(
-                                colors = listOf(Color(0xFF92400E), Color(0xFFFBBF24))
+                                colors = listOf(DeepOrange, AmberYellow)
                             ),
                             shape = RoundedCornerShape(10.dp)
                         )
@@ -567,7 +598,7 @@ fun VacuumControlBalloon(
                 ) {
                     Text(
                         text = "🏠  Şarj İstasyonuna Dön",
-                        color = Color(0xFF1A0A00),
+                        color = DarkBrown,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp
                     )

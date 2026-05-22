@@ -1,5 +1,7 @@
 package com.vahitkeskin.loopsweep.ui.screen
 
+import com.vahitkeskin.loopsweep.ui.theme.*
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -63,20 +65,20 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0A0F1D)) // Extremely premium space dark background
+            .background(SpaceDarkBg) // Extremely premium space dark background
     ) {
         // Glowing background blobs for glassmorphic light refraction
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(Color(0xFF8B5CF6).copy(alpha = 0.12f), Color.Transparent),
+                    colors = listOf(MediumPurple.copy(alpha = 0.12f), Color.Transparent),
                     center = Offset(size.width * 0.15f, size.height * 0.25f),
                     radius = size.width * 0.7f
                 )
             )
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(Color(0xFF06B6D4).copy(alpha = 0.12f), Color.Transparent),
+                    colors = listOf(ThemeCyan.copy(alpha = 0.12f), Color.Transparent),
                     center = Offset(size.width * 0.85f, size.height * 0.75f),
                     radius = size.width * 0.7f
                 )
@@ -124,7 +126,7 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
                             .weight(1f)
                             .background(
                                 brush = Brush.linearGradient(
-                                    colors = listOf(Color(0xFF7F1D1D), Color(0xFFEF4444))
+                                    colors = listOf(DarkRed, AlertRed)
                                 ),
                                 shape = RoundedCornerShape(14.dp)
                             )
@@ -146,7 +148,7 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
                             .weight(1f)
                             .background(
                                 brush = Brush.linearGradient(
-                                    colors = listOf(Color(0xFF78350F), Color(0xFFFBBF24))
+                                    colors = listOf(WarmBrown, AmberYellow)
                                 ),
                                 shape = RoundedCornerShape(14.dp)
                             )
@@ -156,7 +158,7 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
                     ) {
                         Text(
                             text = "🏠  Şarj İstasyonu",
-                            color = Color(0xFF1A0F00),
+                            color = DeepBrown,
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
                             textAlign = TextAlign.Center

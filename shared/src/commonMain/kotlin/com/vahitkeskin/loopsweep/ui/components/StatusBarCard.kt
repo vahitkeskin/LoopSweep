@@ -1,5 +1,7 @@
 package com.vahitkeskin.loopsweep.ui.components
 
+import com.vahitkeskin.loopsweep.ui.theme.*
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -25,11 +27,11 @@ fun StatusBarCard(
     modifier: Modifier = Modifier
 ) {
     val dotColor = when {
-        isLoading -> Color(0xFFF59E0B) // Orange
-        deviceStatusText == "Şarj Ediliyor" -> Color(0xFF10B981) // Green
-        deviceStatusText == "Süpürüyor" || deviceStatusText == "Paspas Yapıyor" || deviceStatusText.contains("Süpürüyor") -> Color(0xFF3B82F6) // Blue
+        isLoading -> ThemeOrange // Orange
+        deviceStatusText == "Şarj Ediliyor" -> EmeraldGreen // Green
+        deviceStatusText == "Süpürüyor" || deviceStatusText == "Paspas Yapıyor" || deviceStatusText.contains("Süpürüyor") -> ThemeBlue // Blue
         deviceStatusText == "Beklemede" -> Color.White.copy(alpha = 0.4f) // Muted white
-        else -> Color(0xFF10B981) // Default Green
+        else -> EmeraldGreen // Default Green
     }
 
     Box(
@@ -88,7 +90,7 @@ fun StatusBarCard(
                 ) {
                     Text(
                         text = if (isCharging) "⚡ %$batteryLevel" else "🔋 %$batteryLevel",
-                        color = if (isCharging) Color(0xFF10B981) else Color.White.copy(alpha = 0.9f),
+                        color = if (isCharging) EmeraldGreen else Color.White.copy(alpha = 0.9f),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
