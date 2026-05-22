@@ -28,7 +28,7 @@
 ## 🚀 The Paradigm Shift: Kotlin Multiplatform & Compose Multiplatform
 
 <div align="center">
-  <img src="docs/images/kmp_compose_showcase.png" alt="Compose Multiplatform Ecosystem" width="100%" style="border-radius: 12px; margin: 20px 0;" />
+  <img src="docs/images/kmp_compose_showcase_wide.png" alt="Compose Multiplatform Ecosystem" width="100%" />
 </div>
 
 **LoopSweep** is built on **Compose Multiplatform** and **Kotlin Multiplatform (KMP)**—the state-of-the-art framework combination that has redefined the cross-platform development landscape. By moving away from slow, web-based hybrid wrappers (like Cordova or early-stage hybrid engines), LoopSweep utilizes a compile-to-native system that shares domain logic and renders pixel-perfect UIs with native performance.
