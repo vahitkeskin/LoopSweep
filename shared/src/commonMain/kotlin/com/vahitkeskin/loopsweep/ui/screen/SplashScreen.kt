@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vahitkeskin.loopsweep.ui.theme.EmeraldGreen
 import com.vahitkeskin.loopsweep.ui.theme.SpaceDarkBg
 import com.vahitkeskin.loopsweep.utils.LoopSweepPreview
 import kotlinx.coroutines.delay
@@ -70,6 +71,16 @@ fun SplashScreen(onSplashFinished: () -> Unit, isPreview: Boolean = false) {
         animationSpec = infiniteRepeatable(
             animation = tween(600, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
+        )
+    )
+
+    // Power LED pulsing glow
+    val powerLedAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
         )
     )
 
@@ -189,6 +200,21 @@ fun SplashScreen(onSplashFinished: () -> Unit, isPreview: Boolean = false) {
                 contentDescription = "Robot Body",
                 modifier = Modifier.fillMaxSize()
             )
+
+            // Overlay the glowing LED
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val w = size.width
+                val h = size.height
+                val cx = w / 2f
+                val cy = h / 2f
+                val r = minOf(w, h) / 2f
+
+                drawCircle(
+                    color = EmeraldGreen.copy(alpha = 0.6f * powerLedAlpha),
+                    radius = 3.dp.toPx(), // Slightly larger for better visibility in splash
+                    center = Offset(cx, cy - r * 0.58f)
+                )
+            }
         }
     }
 }
