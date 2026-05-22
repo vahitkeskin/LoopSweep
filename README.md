@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="shared/src/commonMain/composeResources/files/robot_animated.gif" alt="LoopSweep Animated Logo" width="200" height="200" />
+  <img src="shared/src/commonMain/composeResources/files/robot_animated.gif" alt="LoopSweep Animated Logo" width="200" height="200" style="margin-top: 10px;" />
   
   # 🧹 LoopSweep
   **A Next-Generation, Beautifully Crafted Robot Vacuum Controller built with Compose Multiplatform.**
