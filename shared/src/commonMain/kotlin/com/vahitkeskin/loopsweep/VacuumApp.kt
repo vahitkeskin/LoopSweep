@@ -26,6 +26,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
@@ -442,9 +448,25 @@ fun GlassmorphicBottomNavigation(
             )
 
             // Click balloon popup
-            if (showMenu) {
+            val transition = updateTransition(targetState = showMenu, label = "BalloonTransition")
+            val alpha by transition.animateFloat(
+                transitionSpec = { tween(durationMillis = 150, easing = LinearOutSlowInEasing) },
+                label = "alpha"
+            ) { state ->
+                if (state) 1f else 0f
+            }
+            val scale by transition.animateFloat(
+                transitionSpec = { tween(durationMillis = 150, easing = LinearOutSlowInEasing) },
+                label = "scale"
+            ) { state ->
+                if (state) 1f else 0.8f
+            }
+
+            if (showMenu || transition.currentState) {
                 VacuumControlBalloon(
                     buttonSizePx = with(LocalDensity.current) { buttonSize.roundToPx() },
+                    alpha = alpha,
+                    scale = scale,
                     isCleaning = isCleaning,
                     onDismiss = { showMenu = false },
                     onCleanClicked = { showMenu = false; onCleanClicked() },
@@ -459,6 +481,8 @@ fun GlassmorphicBottomNavigation(
 @Composable
 fun VacuumControlBalloon(
     buttonSizePx: Int,
+    alpha: Float,
+    scale: Float,
     isCleaning: Boolean,
     onDismiss: () -> Unit,
     onCleanClicked: () -> Unit,
@@ -479,6 +503,12 @@ fun VacuumControlBalloon(
             modifier = Modifier
                 .width(230.dp)
                 .wrapContentHeight()
+                .graphicsLayer {
+                    this.alpha = alpha
+                    this.scaleX = scale
+                    this.scaleY = scale
+                    this.transformOrigin = TransformOrigin(0.5f, 1f)
+                }
                 .drawBehind {
                     val arrowH = arrowHeightDp.toPx()
                     val bodyH = size.height - arrowH
