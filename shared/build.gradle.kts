@@ -91,6 +91,7 @@ kotlin {
                 implementation(libs.ktor.client.core)
                 implementation(libs.androidx.datastore)
                 implementation(libs.androidx.datastore.preferences)
+                implementation(libs.jetbrains.navigation.compose)
             }
         }
         jvmMain.dependencies {

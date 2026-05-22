@@ -4,6 +4,12 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.vahitkeskin.loopsweep.navigation.Screen
+import com.vahitkeskin.loopsweep.ui.components.BottomNavItem
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -72,10 +78,6 @@ import com.vahitkeskin.loopsweep.ui.theme.EmeraldGreen
 import com.vahitkeskin.loopsweep.ui.theme.SpaceDarkBg
 import com.vahitkeskin.loopsweep.ui.theme.SystemGray
 
-enum class Screen {
-    Dashboard, Cloud
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VacuumApp() {
@@ -100,7 +102,9 @@ fun VacuumApp() {
         )
     }
 
-    var currentScreen by remember { mutableStateOf(Screen.Dashboard) }
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Dashboard.route
 
     val activeIp by viewModel.ipAddress.collectAsState()
     val activeToken by viewModel.token.collectAsState()
@@ -120,8 +124,17 @@ fun VacuumApp() {
         Scaffold(
             bottomBar = {
                 GlassmorphicBottomNavigation(
-                    currentScreen = currentScreen,
-                    onScreenSelected = { currentScreen = it },
+                    currentRoute = currentRoute,
+                    onRouteSelected = { route ->
+                        navController.navigate(route) {
+                            // TODO: Avoid multiple copies of the same destination when reselecting the same item
+                            popUpTo(navController.graph.startDestinationRoute ?: Screen.Dashboard.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                     isCleaning = isCleaning,
                     isCharging = isCharging,
                     onCleanClicked = {
@@ -142,12 +155,14 @@ fun VacuumApp() {
                     .fillMaxSize()
                     .padding(top = paddingValues.calculateTopPadding())
             ) {
-                when (currentScreen) {
-                    Screen.Dashboard -> {
+                NavHost(
+                    navController = navController,
+                    startDestination = Screen.Dashboard.route
+                ) {
+                    composable(Screen.Dashboard.route) {
                         VacuumScreen(viewModel = viewModel)
                     }
-
-                    Screen.Cloud -> {
+                    composable(Screen.Cloud.route) {
                         XiaomiCloudScreen(
                             viewModel = cloudViewModel,
                             activeIp = activeIp,
@@ -202,112 +217,11 @@ class CutoutShape : Shape {
     }
 }
 
-@Composable
-fun BarcodeIcon(color: Color = Color.Black) {
-    Canvas(modifier = Modifier.size(24.dp)) {
-        val w = size.width
-        val h = size.height
-        val strokeWidth = 2.dp.toPx()
-        drawLine(
-            color,
-            Offset(w * 0.15f, h * 0.2f),
-            Offset(w * 0.15f, h * 0.8f),
-            strokeWidth * 1.5f
-        )
-        drawLine(color, Offset(w * 0.3f, h * 0.2f), Offset(w * 0.3f, h * 0.8f), strokeWidth * 0.5f)
-        drawLine(
-            color,
-            Offset(w * 0.42f, h * 0.2f),
-            Offset(w * 0.42f, h * 0.8f),
-            strokeWidth * 1.2f
-        )
-        drawLine(
-            color,
-            Offset(w * 0.55f, h * 0.2f),
-            Offset(w * 0.55f, h * 0.8f),
-            strokeWidth * 0.8f
-        )
-        drawLine(color, Offset(w * 0.7f, h * 0.2f), Offset(w * 0.7f, h * 0.8f), strokeWidth * 1.6f)
-        drawLine(
-            color,
-            Offset(w * 0.85f, h * 0.2f),
-            Offset(w * 0.85f, h * 0.8f),
-            strokeWidth * 0.5f
-        )
-    }
-}
-
-@Composable
-fun StatisticsIcon(color: Color) {
-    Canvas(modifier = Modifier.size(24.dp)) {
-        val w = size.width
-        val h = size.height
-        val barWidth = w / 4f
-        val spacing = w / 8f
-
-        drawRoundRect(
-            color = color,
-            topLeft = Offset(spacing, h * 0.5f),
-            size = Size(barWidth, h * 0.5f),
-            cornerRadius = CornerRadius(2.dp.toPx(), 2.dp.toPx())
-        )
-        drawRoundRect(
-            color = color,
-            topLeft = Offset(spacing * 2 + barWidth, h * 0.2f),
-            size = Size(barWidth, h * 0.8f),
-            cornerRadius = CornerRadius(2.dp.toPx(), 2.dp.toPx())
-        )
-        drawRoundRect(
-            color = color,
-            topLeft = Offset(spacing * 3 + barWidth * 2, h * 0.6f),
-            size = Size(barWidth, h * 0.4f),
-            cornerRadius = CornerRadius(2.dp.toPx(), 2.dp.toPx())
-        )
-    }
-}
-
-@Composable
-fun PurchaseIcon(color: Color) {
-    Canvas(modifier = Modifier.size(24.dp)) {
-        val w = size.width
-        val h = size.height
-        val strokeWidth = 2.dp.toPx()
-
-        val pathHandle = Path().apply {
-            moveTo(w * 0.25f, h * 0.5f)
-            quadraticTo(w * 0.5f, h * 0.1f, w * 0.75f, h * 0.5f)
-        }
-        drawPath(
-            path = pathHandle,
-            color = color,
-            style = Stroke(width = strokeWidth)
-        )
-
-        val pathBasket = Path().apply {
-            moveTo(w * 0.15f, h * 0.5f)
-            lineTo(w * 0.85f, h * 0.5f)
-            lineTo(w * 0.75f, h * 0.9f)
-            lineTo(w * 0.25f, h * 0.9f)
-            close()
-        }
-        drawPath(
-            path = pathBasket,
-            color = color
-        )
-
-        drawCircle(
-            color = Color.White,
-            radius = 2.dp.toPx(),
-            center = Offset(w * 0.5f, h * 0.7f)
-        )
-    }
-}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GlassmorphicBottomNavigation(
-    currentScreen: Screen,
-    onScreenSelected: (Screen) -> Unit,
+    currentRoute: String,
+    onRouteSelected: (String) -> Unit,
     isCleaning: Boolean,
     isCharging: Boolean,
     onCleanClicked: () -> Unit,
@@ -394,81 +308,63 @@ fun GlassmorphicBottomNavigation(
                 .height(barHeight),
             verticalAlignment = Alignment.Bottom
         ) {
-            // Left Column (Statistics)
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clickable(
-                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                        indication = null,
-                        onClick = { onScreenSelected(Screen.Dashboard) }
-                    )
-                    .padding(bottom = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                Box(
-                    modifier = Modifier.height(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    StatisticsIcon(color = if (currentScreen == Screen.Dashboard) AmberYellow else SystemGray)
-                }
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "Statistics",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (currentScreen == Screen.Dashboard) AmberYellow else SystemGray
-                )
-            }
+            val navItems = listOf(
+                BottomNavItem.Dashboard,
+                null, // Placeholder for the Middle "Start" button
+                BottomNavItem.Cloud
+            )
 
-            // Middle Column (Scan text placeholder - aligned with other columns)
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(bottom = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                Spacer(modifier = Modifier.height(32.dp))
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "Start",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = SystemGray
-                )
-            }
-
-            // Right Column (Purchase)
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clickable(
-                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                        indication = null,
-                        onClick = { onScreenSelected(Screen.Cloud) }
-                    )
-                    .padding(bottom = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                Box(
-                    modifier = Modifier.height(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    PurchaseIcon(color = if (currentScreen == Screen.Cloud) AmberYellow else SystemGray)
+            navItems.forEach { item ->
+                if (item != null) {
+                    val isSelected = currentRoute == item.screen.route
+                    val activeColor = if (isSelected) AmberYellow else SystemGray
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clickable(
+                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                indication = null,
+                                onClick = { onRouteSelected(item.screen.route) }
+                            )
+                            .padding(bottom = 12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        Box(
+                            modifier = Modifier.height(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            item.icon(activeColor)
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = item.label,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = activeColor
+                        )
+                    }
+                } else {
+                    // Middle Column (Start button label placeholder)
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .padding(bottom = 12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Start",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = SystemGray
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "Purchase",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (currentScreen == Screen.Cloud) AmberYellow else SystemGray
-                )
             }
         }
 

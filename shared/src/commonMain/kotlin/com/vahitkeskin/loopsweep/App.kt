@@ -7,21 +7,34 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.tooling.preview.Preview
 import com.vahitkeskin.loopsweep.ui.screen.SplashScreen
+import com.vahitkeskin.loopsweep.navigation.Screen
 
 @Composable
 @Preview
 fun App() {
     MaterialTheme {
-        var showSplash by remember { mutableStateOf(true) }
+        val navController = rememberNavController()
 
-        Crossfade(targetState = showSplash, label = "AppSplashTransition") { isSplash ->
-            if (isSplash) {
+        NavHost(
+            navController = navController, 
+            startDestination = Screen.Splash.route
+        ) {
+            composable(Screen.Splash.route) {
                 SplashScreen(
-                    onSplashFinished = { showSplash = false }
+                    onSplashFinished = {
+                        navController.navigate(Screen.Vacuum.route) {
+                            // Clear splash screen from back stack to prevent users from navigating back to it
+                            popUpTo(Screen.Splash.route) { inclusive = true }
+                        }
+                    }
                 )
-            } else {
+            }
+            composable(Screen.Vacuum.route) {
                 VacuumApp()
             }
         }
