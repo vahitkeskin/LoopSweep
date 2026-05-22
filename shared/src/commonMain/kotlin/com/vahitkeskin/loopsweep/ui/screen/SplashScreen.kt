@@ -111,16 +111,6 @@ fun SplashScreen(
         )
     )
 
-    // LiDAR sweep back and forth
-    val lidarSweepAngle by infiniteTransition.animateFloat(
-        initialValue = -35f,
-        targetValue = 35f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1400, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
-
     // Card metallic shimmer sweep animation
     val shimmerTranslate by infiniteTransition.animateFloat(
         initialValue = -400f,
@@ -254,38 +244,6 @@ fun SplashScreen(
                     ),
                     radius = vacuumRadius * 1.3f,
                     center = Offset(cx, cy)
-                )
-
-                // 5. Draw active LiDAR laser scanning cone ahead of the vacuum
-                val lidarPath = Path().apply {
-                    moveTo(cx, cy - vacuumRadius * 0.8f) // scanner turret center
-                    val distance = 160.dp.toPx()
-                    val leftAngleRad = (-90f + lidarSweepAngle - 18f) * kotlin.math.PI / 180.0
-                    val rightAngleRad = (-90f + lidarSweepAngle + 18f) * kotlin.math.PI / 180.0
-
-                    val lx = (cx + distance * kotlin.math.cos(leftAngleRad)).toFloat()
-                    val ly =
-                        (cy - vacuumRadius * 0.8f + distance * kotlin.math.sin(leftAngleRad)).toFloat()
-
-                    val rx = (cx + distance * kotlin.math.cos(rightAngleRad)).toFloat()
-                    val ry =
-                        (cy - vacuumRadius * 0.8f + distance * kotlin.math.sin(rightAngleRad)).toFloat()
-
-                    lineTo(lx, ly)
-                    lineTo(rx, ry)
-                    close()
-                }
-                drawPath(
-                    path = lidarPath,
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            EmeraldGreen.copy(alpha = 0.25f),
-                            EmeraldGreen.copy(alpha = 0.04f),
-                            Color.Transparent
-                        ),
-                        center = Offset(cx, cy - vacuumRadius * 0.8f),
-                        radius = 180.dp.toPx()
-                    )
                 )
 
                 // 6. Draw dust particles with realistic suction physics & side brush sweeping rotation
