@@ -25,6 +25,33 @@
 
 <br/>
 
+## 🚀 The Paradigm Shift: Kotlin Multiplatform & Compose Multiplatform
+
+<div align="center">
+  <img src="docs/images/kmp_compose_showcase.png" alt="Compose Multiplatform Ecosystem" width="80%" style="border-radius: 12px; margin: 20px 0;" />
+</div>
+
+**LoopSweep** is built on **Compose Multiplatform** and **Kotlin Multiplatform (KMP)**—the state-of-the-art framework combination that has redefined the cross-platform development landscape. By moving away from slow, web-based hybrid wrappers (like Cordova or early-stage hybrid engines), LoopSweep utilizes a compile-to-native system that shares domain logic and renders pixel-perfect UIs with native performance.
+
+### Why Compose Multiplatform is a Game-Changer 🎨
+* **100% Declarative UI with Skia/Impeller:** Unlike older frameworks that translate UI layouts into native platform widgets (leading to rendering bugs or inconsistent themes across iOS and Android), Compose Multiplatform renders UI directly onto a high-performance **Skia** (or iOS **Impeller**) canvas. This ensures that custom animations, glassmorphic blur effects, and complex canvas layouts look **exactly the same** on a 120Hz iPhone screen, a 2K Android tablet, and a 4K Desktop monitor.
+* **Unified State Hoisting:** By implementing Unidirectional Data Flow (UDF) through Kotlin Coroutines and StateFlows, UI state transitions remain extremely deterministic. You write the UI logic once in common Kotlin, and it handles states flawlessly on iOS, Android, and Desktop.
+* **Uncompromised Native Interoperability:** Need native platform integration? Jetpack Compose does not isolate you in a sandbox. You can seamlessly embed iOS `UIKit` views (e.g. `UIViewControllerRepresentable`) or Android `XML/Compose` views within the shared layouts, giving you the best of both worlds.
+
+### 📚 Official Resources & Learning Materials
+To deep-dive into the technologies powering LoopSweep, check out the following curated resources:
+
+* **Official Documentation:**
+  * 📖 [Kotlin Multiplatform Portal](https://kotlinlang.org/docs/multiplatform.html) - Learn how code sharing works across platforms.
+  * 🎨 [Compose Multiplatform Guide](https://www.jetbrains.com/lp/compose-mpp/) - JetBrains' official UI framework documentation.
+  * 🎛️ [Jetpack Compose UI](https://developer.android.com/develop/ui/compose) - Google's modern declarative toolkit for Android.
+* **Key Articles & Developments:**
+  * 📰 [Kotlin Multiplatform is Stable](https://blog.jetbrains.com/kotlin/2023/11/kotlin-multiplatform-is-stable-and-production-ready/) - JetBrains' announcement of KMP stability for production use.
+  * 🚀 [Compose Multiplatform for iOS is Beta](https://blog.jetbrains.com/kotlin/2023/05/compose-multiplatform-for-ios-is-in-alpha/) - Detail on the compiler optimizations and native iOS bindings.
+  * ⚡ [Skia/Impeller Rendering Engine](https://blog.jetbrains.com/kotlin/2023/08/compose-multiplatform-1-5-0-release/) - The technology behind multi-platform pixel rendering.
+
+---
+
 ## 🌟 Introduction & System Capabilities
 
 **LoopSweep** is an enterprise-grade, cross-platform controller application designed to seamlessly monitor, schedule, and interact with smart robot vacuums over local network sockets and cloud endpoints. Engineered entirely with **Kotlin Multiplatform (KMP)** and **Compose Multiplatform**, the codebase compiles down to high-performance native binaries on Android, iOS (using Swift/Kotlin native bindings), and Desktop (JVM) platforms from a single shared module.
