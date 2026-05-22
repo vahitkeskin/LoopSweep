@@ -56,3 +56,13 @@ val TranslucentPurple0C = Color(0x0C8B5CF6)
 val TranslucentRed26 = Color(0x26EF4444)
 val VibrantOrange = Color(0xFFEA580C)
 val WarmBrown = Color(0xFF78350F)
+
+// --- Splash Screen & Floor Wood Colors ---
+val PlankColor1 = Color(0xFFE2D4C1)
+val PlankColor2 = Color(0xFFDBCBB6)
+val PlankLineColor = Color(0xFFC8B69F)
+
+// --- Dust Particle Colors ---
+val DustDarkGray = Color(0xFF1A1A1A)
+val DustMediumGray = Color(0xFF2B2B2B)
+

@@ -8,4 +8,5 @@ class IOSPlatform: Platform {
 
 actual fun getPlatform(): Platform = IOSPlatform()
 
-actual fun getEpochSeconds(): Long = platform.Foundation.NSDate().timeIntervalSince1970.toLong()
+@OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+actual fun getEpochSeconds(): Long = platform.posix.time(null)

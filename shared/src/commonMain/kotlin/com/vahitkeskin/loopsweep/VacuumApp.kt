@@ -383,7 +383,7 @@ fun GlassmorphicBottomNavigation(
             contentAlignment = Alignment.Center
         ) {
             RobotVacuumButtonContent(
-                isCleaning = isCleaning,
+                isCleaning = true,
                 isCharging = isCharging
             )
 
