@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+    <!-- Main Body Background -->
+    <circle cx="512" cy="512" r="500" fill="#2c2c2c" stroke="#1a1a1a" stroke-width="12" />
+    
+    <!-- Outer Ring / Bumper Detail -->
+    <circle cx="512" cy="512" r="480" fill="none" stroke="#404040" stroke-width="4" />
+    <circle cx="512" cy="512" r="470" fill="none" stroke="#222222" stroke-width="2" />
+    
+    <!-- Top Sensor Tower / Button Area -->
+    <rect x="362" y="150" width="300" height="450" rx="150" fill="#1e1e1e" />
+    
+    <!-- Inner Metallic Ring (Lidar/Camera Cover) -->
+    <circle cx="512" cy="450" r="100" fill="#444444" stroke="#000000" stroke-width="8" />
+    <circle cx="512" cy="450" r="90" fill="#555555" />
+    <!-- Metallic gradient effect using simple paths -->
+    <path d="M 430 450 A 82 82 0 0 1 594 450" fill="none" stroke="#888888" stroke-width="8" opacity="0.5" />
+    
+    <!-- Power Button Area -->
+    <rect x="472" y="190" width="80" height="120" rx="40" fill="#111111" stroke="#333333" stroke-width="2" />
+    <!-- Power Icon -->
+    <path d="M 512 205 L 512 220 M 500 215 A 14 14 0 1 0 524 215" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+    <!-- Home Icon -->
+    <path d="M 512 270 L 500 280 L 500 292 L 524 292 L 524 280 Z" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" />
+    <path d="M 495 283 L 512 267 L 529 283" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    
+    <!-- Side Brush -->
+    <path d="M 850 150 L 930 180 M 850 150 L 890 100 M 850 150 L 900 220" stroke="#111111" stroke-width="8" stroke-linecap="round" />
+    <circle cx="850" cy="150" r="12" fill="#000000" />
+    
+    <!-- Text -->
+    <text x="512" y="780" font-family="Arial, sans-serif" font-weight="bold" font-size="36" fill="#ffffff" text-anchor="middle" letter-spacing="4">LoopSweep</text>
+    
+    <!-- Glossy Highlight for 3D effect -->
+    <path d="M 112 512 A 400 400 0 0 1 912 512 A 400 200 0 0 0 112 512" fill="#ffffff" opacity="0.05" />
+</svg>
