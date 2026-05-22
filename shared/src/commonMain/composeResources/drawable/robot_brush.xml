@@ -1,11 +1,11 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="200"
-    android:viewportHeight="200">
+    android:viewportWidth="400"
+    android:viewportHeight="400">
     <group
-        android:translateX="100"
-        android:translateY="100"
+        android:translateX="200"
+        android:translateY="200"
         android:scaleX="2.2"
         android:scaleY="2.2">
         <!-- Arm 1 -->

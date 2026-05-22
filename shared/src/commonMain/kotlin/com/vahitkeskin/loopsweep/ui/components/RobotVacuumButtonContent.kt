@@ -93,15 +93,18 @@ fun RobotVacuumButtonContent(
         remember { mutableStateOf(0f) }
     }
 
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    androidx.compose.foundation.layout.BoxWithConstraints(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        val sizePx = maxWidth
+
         // Draw the Side Brush
+        // Original viewport is 1024. Brush is at (850, 150), so DeltaX = +338, DeltaY = -362
+        // Brush vector viewport is 400x400. 400 / 1024 = 0.39f
         Image(
             painter = painterResource(Res.drawable.robot_brush),
             contentDescription = "Side Brush",
             modifier = Modifier
-                .fillMaxSize(0.28f)
-                .align(Alignment.TopEnd)
-                .offset(x = (-8).dp, y = 8.dp)
+                .size(sizePx * 0.39f)
+                .offset(x = sizePx * 0.33f, y = -(sizePx * 0.353f))
                 .rotate(brushAngle)
                 .scale(1f + (armFlex + 0.4f) * 0.1f)
         )
