@@ -499,12 +499,12 @@ fun VacuumControlBalloon(
                         cornerRadius = cornerR,
                         style = Stroke(width = 1.dp.toPx())
                     )
-                    // Cover the full bottom border line so the triangle base has no horizontal line.
-                    // The corners are 14dp from edge so starting at 0f is safe (corner curves end there).
+                    // Cover only the portion of the bottom border where the arrow connects,
+                    // so the rest of the bottom border remains visible.
                     drawRect(
                         color = balloonColor,
-                        topLeft = Offset(0f, bodyH - 1.dp.toPx()),
-                        size = Size(size.width, 1.dp.toPx() + 1f)
+                        topLeft = Offset(cx - arrowW / 2f, bodyH - 1.dp.toPx()),
+                        size = Size(arrowW, 1.dp.toPx() + 1f)
                     )
                     // Arrow fill (triangle pointing down)
                     val arrowFillPath = Path().apply {
