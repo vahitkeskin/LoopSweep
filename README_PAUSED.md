@@ -1,8 +1,8 @@
 <div align="center">
-  <img src="shared/src/commonMain/composeResources/files/robot_animated.gif" alt="LoopSweep Animated Logo" width="200" height="200" style="margin-top: 10px;" />
+  <img src="shared/src/commonMain/composeResources/files/robot_static.png" alt="LoopSweep Static Logo" width="200" height="200" style="margin-top: 10px;" />
   
   <br/>
-  <h3>🟢 <b>START</b> &nbsp;&nbsp;|&nbsp;&nbsp; <a href="README_PAUSED.md" style="text-decoration:none;">⚪️ PAUSE</a></h3>
+  <h3><a href="README.md" style="text-decoration:none;">🟢 START</a> &nbsp;&nbsp;|&nbsp;&nbsp; ⚪️ <b>PAUSE</b></h3>
   <br/>
 
   # 🧹 LoopSweep
