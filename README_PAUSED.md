@@ -27,6 +27,12 @@ Instead of relying on static assets, LoopSweep uses high-performance, real-time 
 
 ---
 
+## 🎲 3D Model Explorer (Interactive)
+Want to explore the physical shape of the LoopSweep Robot Vacuum? We have prepared a 3D STL model for you.
+👉 **[Click here to view and interact with the 3D Robot Vacuum Model (Rotate, Zoom, and Pan natively on GitHub!)](robot_3d_model.stl)**
+
+---
+
 ## ✨ Key Features
 
 ### 🎨 Stunning Visuals & UI
@@ -35,52 +41,60 @@ Instead of relying on static assets, LoopSweep uses high-performance, real-time 
 * **Minimalist Aesthetics:** Custom-drawn icons, precisely tailored stroke widths (`0.4.dp`), and refined component sizing for a premium feel.
 
 ### 🤖 Dynamic Canvas Animations (`RobotVacuumButtonContent`)
-The centerpiece of the application is the `RobotVacuumButtonContent`, entirely built from scratch using Compose `Canvas`.
+The centerpiece of the application is the `RobotVacuumButtonContent`, entirely built from scratch using Compose `Canvas` and `ImageVector`s.
 * **LiDAR Turret:** A miniaturized, chrome-bezeled LiDAR dome that spins realistically during cleaning.
-* **Flexing Side Brushes:** Advanced trigonometry and quadratic bezier curves calculate real-time drag and bristle-spread as the side brushes spin!
+* **Flexing Side Brushes:** Advanced infinite animations calculate real-time drag and bristle-spread as the side brushes spin!
 * **Pulsing Status LEDs:** Glowing Power and Home indicators that breathe based on the robot's current state (Cleaning / Charging).
 
-### 🛠️ Developer Experience
-* **Custom Previews:** Uses a specialized `@LoopSweepPreview` annotation to isolate, test, and render components instantly without launching the full app.
-* **Component-Based Architecture:** Fully modularized components (e.g., `RobotVacuumButtonContent`, `GlassmorphicBottomNavigation`).
+---
+
+## 🏛️ Project Architecture
+
+LoopSweep follows modern Android and KMP best practices, relying heavily on **Unidirectional Data Flow (UDF)** and a clean separation of concerns.
+
+* **UI Layer:** Completely written in Compose Multiplatform. State is hoisted to parent components (`VacuumApp`) and passed down as immutable properties to stateless composables.
+* **Component-Based Architecture:** Every distinct UI element is separated into its own module under `ui/components` (e.g., `RobotVacuumButtonContent`, `GlassmorphicBottomNavigation`, `XiaomiCloudScreen`).
+* **Shared Logic:** The `shared/` module is the single source of truth for business logic, state management, and UI rendering. Platform-specific modules only act as thin entry points.
 
 ---
 
-## 📸 Screenshots & Previews
-
-*(Replace these placeholders with your actual project screenshots / GIFs)*
-
-<p align="center">
-  <img src="https://via.placeholder.com/250x500.png?text=Android+App" alt="Android Screenshot" width="250"/>
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="https://via.placeholder.com/400x500.png?text=Desktop+App" alt="Desktop Screenshot" width="400"/>
-  <br/><br/>
-  <img src="https://via.placeholder.com/600x300.png?text=Brush+Animation+GIF" alt="Brush Animation" width="600"/>
-</p>
-
----
-
-## 🏗️ Project Structure
+## 📦 Detailed Package Structure
 
 The repository is organized following standard Kotlin Multiplatform guidelines:
 
 ```text
 LoopSweep/
-├── shared/               # The core logic & UI shared across ALL platforms!
+├── shared/                                 # The core logic & UI shared across ALL platforms!
 │   └── src/
-│       ├── commonMain/   # Compose UI (VacuumApp.kt, RobotVacuumButtonContent.kt)
-│       ├── androidMain/  # Android-specific implementations
-│       ├── iosMain/      # iOS-specific bindings
-│       └── desktopMain/  # JVM/Desktop window settings
-├── androidApp/           # Android application entry point & Manifest
-├── desktopApp/           # Desktop (JVM) main function & packaging
-└── iosApp/               # Xcode project and SwiftUI wrapper for iOS
+│       ├── commonMain/
+│       │   ├── composeResources/           # Cross-platform fonts, SVGs, and images
+│       │   └── kotlin/com/vahitkeskin/loopsweep/
+│       │       ├── ui/
+│       │       │   ├── components/         # Reusable UI widgets (RobotVacuumButtonContent, Buttons)
+│       │       │   ├── screen/             # Full screen layouts (XiaomiCloudScreen, MapScreen)
+│       │       │   └── theme/              # Color palettes, Typography, and Shapes
+│       │       ├── utils/                  # Helper classes, Logger expectations, Preview annotations
+│       │       └── VacuumApp.kt            # The root Compose application state holder
+│       ├── androidMain/                    # Android-specific actual implementations (e.g., System Logger)
+│       ├── iosMain/                        # iOS-specific actual implementations
+│       └── desktopMain/                    # JVM/Desktop window settings & actual implementations
+├── androidApp/                             # Android application entry point (MainActivity)
+├── desktopApp/                             # Desktop (JVM) main function & packaging
+└── iosApp/                                 # Xcode project and SwiftUI wrapper for iOS
 ```
 
-### 📂 Important Files
-* [`shared/src/commonMain/kotlin/com/vahitkeskin/loopsweep/VacuumApp.kt`](shared/src/commonMain/kotlin/com/vahitkeskin/loopsweep/VacuumApp.kt): The root Compose application, handling navigation, state (`isCleaning`, `isCharging`), and the glassmorphic bottom bar.
-* [`shared/src/commonMain/kotlin/com/vahitkeskin/loopsweep/ui/components/RobotVacuumButtonContent.kt`](shared/src/commonMain/kotlin/com/vahitkeskin/loopsweep/ui/components/RobotVacuumButtonContent.kt): The complex mathematical Canvas rendering of the robot vacuum.
-* [`shared/src/commonMain/kotlin/com/vahitkeskin/loopsweep/utils/LoopSweepPreview.kt`](shared/src/commonMain/kotlin/com/vahitkeskin/loopsweep/utils/LoopSweepPreview.kt): Custom Preview annotation configuration.
+---
+
+## 💻 Tech Stack & Technologies
+
+LoopSweep is built on the shoulders of giants. Here are the core technologies powering the app:
+
+* **Kotlin (2.x):** Modern, expressive, and type-safe programming language.
+* **Compose Multiplatform (1.6+):** JetBrains' declarative UI framework allowing UI sharing across iOS, Android, and Desktop.
+* **Kotlin Coroutines:** For non-blocking, asynchronous state handling and background tasks.
+* **Gradle Version Catalogs & Kotlin DSL:** For clean, type-safe, and centralized dependency management (`libs.versions.toml`).
+* **Coil-Compose:** High-performance image loading and caching for cross-platform.
+* **Cairosvg & Pillow (Python):** Custom developer scripts (`scripts/`) used to dynamically generate perfectly looped SVGs and GIFs for README and mockups.
 
 ---
 
@@ -113,13 +127,6 @@ You can easily launch the applications using the IDE Run Configurations or via G
 1. Open the `iosApp` directory in Xcode.
 2. Select your target simulator or device.
 3. Hit **Build and Run** (`Cmd + R`).
-
----
-
-## 🛠️ Tech Stack & Libraries
-* **Kotlin:** 2.x
-* **Compose Multiplatform:** JetBrains' declarative UI framework.
-* **Coroutines:** For asynchronous state handling.
 
 ---
 
