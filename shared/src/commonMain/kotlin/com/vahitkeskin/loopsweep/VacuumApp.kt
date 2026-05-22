@@ -1,53 +1,76 @@
 package com.vahitkeskin.loopsweep
 
-import com.vahitkeskin.loopsweep.ui.theme.*
-
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.Canvas
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.animation.core.updateTransition
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.animation.core.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.vahitkeskin.loopsweep.di.AppContainer
 import com.vahitkeskin.loopsweep.presentation.VacuumViewModel
 import com.vahitkeskin.loopsweep.presentation.XiaomiCloudViewModel
+import com.vahitkeskin.loopsweep.ui.components.RobotVacuumButtonContent
 import com.vahitkeskin.loopsweep.ui.screen.VacuumScreen
 import com.vahitkeskin.loopsweep.ui.screen.XiaomiCloudScreen
-import com.vahitkeskin.loopsweep.ui.components.RobotVacuumButtonContent
+import com.vahitkeskin.loopsweep.ui.theme.AlertRed
+import com.vahitkeskin.loopsweep.ui.theme.AmberYellow
+import com.vahitkeskin.loopsweep.ui.theme.BlueGray
+import com.vahitkeskin.loopsweep.ui.theme.DarkBrown
+import com.vahitkeskin.loopsweep.ui.theme.DarkNavy
+import com.vahitkeskin.loopsweep.ui.theme.DarkRed
+import com.vahitkeskin.loopsweep.ui.theme.DeepGreen
+import com.vahitkeskin.loopsweep.ui.theme.DeepOrange
+import com.vahitkeskin.loopsweep.ui.theme.EmeraldGreen
+import com.vahitkeskin.loopsweep.ui.theme.SpaceDarkBg
+import com.vahitkeskin.loopsweep.ui.theme.SystemGray
 
 enum class Screen {
     Dashboard, Cloud
@@ -57,8 +80,8 @@ enum class Screen {
 @Composable
 fun VacuumApp() {
     val appContainer = remember { AppContainer() }
-    
-    val viewModel = remember { 
+
+    val viewModel = remember {
         VacuumViewModel(
             cleanRoomUseCase = appContainer.cleanRoomUseCase,
             getVacuumPropertiesUseCase = appContainer.getVacuumPropertiesUseCase,
@@ -123,6 +146,7 @@ fun VacuumApp() {
                     Screen.Dashboard -> {
                         VacuumScreen(viewModel = viewModel)
                     }
+
                     Screen.Cloud -> {
                         XiaomiCloudScreen(
                             viewModel = cloudViewModel,
@@ -151,13 +175,13 @@ class CutoutShape : Shape {
             val cutoutW = with(density) { 120.dp.toPx() }
             val cutoutH = with(density) { 36.dp.toPx() }
             val center = width / 2f
-            
+
             val leftStart = center - cutoutW / 2f
             val rightEnd = center + cutoutW / 2f
-            
+
             moveTo(0f, 0f)
             lineTo(leftStart, 0f)
-            
+
             cubicTo(
                 x1 = leftStart + cutoutW * 0.3f, y1 = 0f,
                 x2 = center - cutoutW * 0.25f, y2 = cutoutH,
@@ -168,7 +192,7 @@ class CutoutShape : Shape {
                 x2 = rightEnd - cutoutW * 0.3f, y2 = 0f,
                 x3 = rightEnd, y3 = 0f
             )
-            
+
             lineTo(width, 0f)
             lineTo(width, height)
             lineTo(0f, height)
@@ -184,12 +208,32 @@ fun BarcodeIcon(color: Color = Color.Black) {
         val w = size.width
         val h = size.height
         val strokeWidth = 2.dp.toPx()
-        drawLine(color, Offset(w * 0.15f, h * 0.2f), Offset(w * 0.15f, h * 0.8f), strokeWidth * 1.5f)
+        drawLine(
+            color,
+            Offset(w * 0.15f, h * 0.2f),
+            Offset(w * 0.15f, h * 0.8f),
+            strokeWidth * 1.5f
+        )
         drawLine(color, Offset(w * 0.3f, h * 0.2f), Offset(w * 0.3f, h * 0.8f), strokeWidth * 0.5f)
-        drawLine(color, Offset(w * 0.42f, h * 0.2f), Offset(w * 0.42f, h * 0.8f), strokeWidth * 1.2f)
-        drawLine(color, Offset(w * 0.55f, h * 0.2f), Offset(w * 0.55f, h * 0.8f), strokeWidth * 0.8f)
+        drawLine(
+            color,
+            Offset(w * 0.42f, h * 0.2f),
+            Offset(w * 0.42f, h * 0.8f),
+            strokeWidth * 1.2f
+        )
+        drawLine(
+            color,
+            Offset(w * 0.55f, h * 0.2f),
+            Offset(w * 0.55f, h * 0.8f),
+            strokeWidth * 0.8f
+        )
         drawLine(color, Offset(w * 0.7f, h * 0.2f), Offset(w * 0.7f, h * 0.8f), strokeWidth * 1.6f)
-        drawLine(color, Offset(w * 0.85f, h * 0.2f), Offset(w * 0.85f, h * 0.8f), strokeWidth * 0.5f)
+        drawLine(
+            color,
+            Offset(w * 0.85f, h * 0.2f),
+            Offset(w * 0.85f, h * 0.8f),
+            strokeWidth * 0.5f
+        )
     }
 }
 
@@ -200,7 +244,7 @@ fun StatisticsIcon(color: Color) {
         val h = size.height
         val barWidth = w / 4f
         val spacing = w / 8f
-        
+
         drawRoundRect(
             color = color,
             topLeft = Offset(spacing, h * 0.5f),
@@ -228,7 +272,7 @@ fun PurchaseIcon(color: Color) {
         val w = size.width
         val h = size.height
         val strokeWidth = 2.dp.toPx()
-        
+
         val pathHandle = Path().apply {
             moveTo(w * 0.25f, h * 0.5f)
             quadraticTo(w * 0.5f, h * 0.1f, w * 0.75f, h * 0.5f)
@@ -238,7 +282,7 @@ fun PurchaseIcon(color: Color) {
             color = color,
             style = Stroke(width = strokeWidth)
         )
-        
+
         val pathBasket = Path().apply {
             moveTo(w * 0.15f, h * 0.5f)
             lineTo(w * 0.85f, h * 0.5f)
@@ -250,7 +294,7 @@ fun PurchaseIcon(color: Color) {
             path = pathBasket,
             color = color
         )
-        
+
         drawCircle(
             color = Color.White,
             radius = 2.dp.toPx(),
@@ -637,4 +681,3 @@ fun VacuumControlBalloon(
         }
     }
 }
-
