@@ -45,7 +45,7 @@ def add_cylinder(f, r, h, z_offset, segments=32):
         add_triangle(f, b1, b2, t1)
         add_triangle(f, t1, b2, t2)
 
-with open("robot_3d_model.stl", "w") as f:
+with open("../robot_3d_model.stl", "w") as f:
     f.write("solid robot\n")
     # Base cylinder (radius 150, height 50)
     add_cylinder(f, 150, 50, 0, 64)
