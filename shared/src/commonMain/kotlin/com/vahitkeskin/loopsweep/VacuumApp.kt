@@ -440,7 +440,7 @@ fun GlassmorphicBottomNavigation(
 
             Text(
                 text = "LOOP SWEEP",
-                fontSize = 4.sp,
+                fontSize = 3.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White.copy(alpha = 0.5f),
                 letterSpacing = 0.5.sp,

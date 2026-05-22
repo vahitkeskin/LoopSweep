@@ -139,7 +139,7 @@ fun RobotVacuumButtonContent(
         rotate(degrees = brushAngle, pivot = Offset(brushHubX, brushHubY)) {
             for (i in 0 until 3) {
                 val angleRad = (i * 120f * 3.14159f / 180f)
-                val armLen = 14.dp.toPx()
+                val armLen = 10.dp.toPx()
                 val armEndX = brushHubX + armLen * kotlin.math.cos(angleRad)
                 val armEndY = brushHubY + armLen * kotlin.math.sin(angleRad)
                 
@@ -154,14 +154,14 @@ fun RobotVacuumButtonContent(
                 drawPath(
                     path = path,
                     color = Color(0xFF111111),
-                    style = Stroke(width = 2.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                    style = Stroke(width = 1.5f.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
                 )
                 
                 // Bristles fanning out
                 for (j in -4..4) {
                     val brSpread = if (isCleaning) 0.12f else 0.08f
                     val brAngle = angleRad + j * brSpread + (armFlex + 0.4f) * 0.5f
-                    val brLen = 6.dp.toPx()
+                    val brLen = 4.dp.toPx()
                     val brEndX = armEndX + brLen * kotlin.math.cos(brAngle)
                     val brEndY = armEndY + brLen * kotlin.math.sin(brAngle)
                     drawLine(
@@ -176,13 +176,13 @@ fun RobotVacuumButtonContent(
             // Draw central hub
             drawCircle(
                 color = Color(0xFF111111),
-                radius = 2.5f.dp.toPx(),
+                radius = 1.5f.dp.toPx(),
                 center = Offset(brushHubX, brushHubY)
             )
             // Draw yellow screw
             drawCircle(
                 color = Color(0xFFE6C200),
-                radius = 1.dp.toPx(),
+                radius = 0.5f.dp.toPx(),
                 center = Offset(brushHubX, brushHubY)
             )
         }
@@ -280,8 +280,8 @@ fun RobotVacuumButtonContent(
         )
 
         // --- DRAW BUTTON PILL (Power & Home) ---
-        val btnPillW = capsuleW * 0.4f
-        val btnPillH = capsuleH * 0.28f
+        val btnPillW = capsuleW * 0.32f
+        val btnPillH = capsuleH * 0.22f
         val btnPillLeft = cx - btnPillW / 2f
         val btnPillTop = capsuleTop + capsuleH * 0.08f
         val btnPillRadius = btnPillW / 2f
@@ -304,7 +304,7 @@ fun RobotVacuumButtonContent(
 
         // Power Icon (top of button pill)
         val powerY = btnPillTop + btnPillH * 0.3f
-        val pIconR = 1.5.dp.toPx()
+        val pIconR = 1.0.dp.toPx()
         val powerColor = if (isCleaning) Color(0xFF10B981) else Color(0xFFD1D5DB)
         
         if (isCleaning) {
@@ -322,19 +322,19 @@ fun RobotVacuumButtonContent(
             useCenter = false,
             topLeft = Offset(cx - pIconR, powerY - pIconR),
             size = Size(pIconR * 2, pIconR * 2),
-            style = Stroke(width = 1.2.dp.toPx())
+            style = Stroke(width = 0.4.dp.toPx())
         )
         drawLine(
             color = powerColor,
             start = Offset(cx, powerY - pIconR * 0.9f),
             end = Offset(cx, powerY + pIconR * 0.1f),
-            strokeWidth = 1.2.dp.toPx()
+            strokeWidth = 0.4.dp.toPx()
         )
 
         // Home Icon (bottom of button pill)
         val homeY = btnPillTop + btnPillH * 0.7f
-        val homeW = 3.0f.dp.toPx()
-        val homeH = 2.5f.dp.toPx()
+        val homeW = 2.2f.dp.toPx()
+        val homeH = 1.8f.dp.toPx()
         val homeColor = if (isCharging) Color(0xFFFBBF24) else Color(0xFFD1D5DB)
 
         if (isCharging) {
@@ -360,12 +360,12 @@ fun RobotVacuumButtonContent(
         drawPath(
             path = pathHouse,
             color = homeColor,
-            style = Stroke(width = 1.2.dp.toPx())
+            style = Stroke(width = 0.4.dp.toPx())
         )
 
         // --- DRAW LIDAR TURRET (Bottom of capsule) ---
-        val lidarW = capsuleW * 0.5f
-        val lidarH = capsuleW * 0.5f
+        val lidarW = capsuleW * 0.4f
+        val lidarH = capsuleW * 0.4f
         val lidarCR = lidarW * 0.3f
         val lidarY = capsuleTop + capsuleH * 0.7f
 
