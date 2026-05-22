@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="robot_icon_1024.png" alt="LoopSweep Logo" width="200" height="200" />
+  <img src="robot_animated.gif" alt="LoopSweep Animated Logo" width="200" height="200" />
   
   # 🧹 LoopSweep
   **A Next-Generation, Beautifully Crafted Robot Vacuum Controller built with Compose Multiplatform.**
