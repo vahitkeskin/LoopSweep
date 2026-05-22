@@ -17,8 +17,8 @@ def create_gif():
         replacement_string = f'transform="translate(850, 150) scale(2.2) rotate({angle})"'
         modified_svg = svg_template.replace(target_string, replacement_string)
         
-        # Expand viewBox so the brush tip doesn't get clipped (-50, -50 to 1124, 1124)
-        modified_svg = modified_svg.replace('viewBox="0 0 1024 1024"', 'viewBox="-50 -50 1124 1124"')
+        # Expand viewBox so the brush tip doesn't get clipped
+        modified_svg = modified_svg.replace('viewBox="0 0 1024 1024"', 'viewBox="-100 -100 1224 1224"')
         png_data = cairosvg.svg2png(bytestring=modified_svg.encode('utf-8'))
         image = Image.open(io.BytesIO(png_data)).convert("RGBA")
         frames.append(image)
