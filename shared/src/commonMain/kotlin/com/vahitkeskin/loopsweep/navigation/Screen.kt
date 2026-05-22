@@ -6,7 +6,6 @@ package com.vahitkeskin.loopsweep.navigation
  */
 sealed class Screen(val route: String) {
     data object Splash : Screen("splash")
-    data object Vacuum : Screen("vacuum")
     data object Dashboard : Screen("dashboard")
     data object Cloud : Screen("cloud")
 }

@@ -66,6 +66,7 @@ import com.vahitkeskin.loopsweep.presentation.XiaomiCloudViewModel
 import com.vahitkeskin.loopsweep.ui.components.RobotVacuumButtonContent
 import com.vahitkeskin.loopsweep.ui.screen.VacuumScreen
 import com.vahitkeskin.loopsweep.ui.screen.XiaomiCloudScreen
+import com.vahitkeskin.loopsweep.ui.screen.SplashScreen
 import com.vahitkeskin.loopsweep.ui.theme.AlertRed
 import com.vahitkeskin.loopsweep.ui.theme.AmberYellow
 import com.vahitkeskin.loopsweep.ui.theme.BlueGray
@@ -104,7 +105,7 @@ fun VacuumApp() {
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Dashboard.route
+    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Splash.route
 
     val activeIp by viewModel.ipAddress.collectAsState()
     val activeToken by viewModel.token.collectAsState()
@@ -123,30 +124,31 @@ fun VacuumApp() {
     ) {
         Scaffold(
             bottomBar = {
-                GlassmorphicBottomNavigation(
-                    currentRoute = currentRoute,
-                    onRouteSelected = { route ->
-                        navController.navigate(route) {
-                            // TODO: Avoid multiple copies of the same destination when reselecting the same item
-                            popUpTo(navController.graph.startDestinationRoute ?: Screen.Dashboard.route) {
-                                saveState = true
+                if (currentRoute != Screen.Splash.route) {
+                    GlassmorphicBottomNavigation(
+                        currentRoute = currentRoute,
+                        onRouteSelected = { route ->
+                            navController.navigate(route) {
+                                popUpTo(Screen.Dashboard.route) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
+                        },
+                        isCleaning = isCleaning,
+                        isCharging = isCharging,
+                        onCleanClicked = {
+                            viewModel.cleanRoom(99, 1, isAllAreas = true)
+                        },
+                        onStopClicked = {
+                            viewModel.stopCleaning()
+                        },
+                        onDockClicked = {
+                            viewModel.returnToDock()
                         }
-                    },
-                    isCleaning = isCleaning,
-                    isCharging = isCharging,
-                    onCleanClicked = {
-                        viewModel.cleanRoom(99, 1, isAllAreas = true)
-                    },
-                    onStopClicked = {
-                        viewModel.stopCleaning()
-                    },
-                    onDockClicked = {
-                        viewModel.returnToDock()
-                    }
-                )
+                    )
+                }
             },
             containerColor = Color.Transparent
         ) { paddingValues ->
@@ -157,8 +159,17 @@ fun VacuumApp() {
             ) {
                 NavHost(
                     navController = navController,
-                    startDestination = Screen.Dashboard.route
+                    startDestination = Screen.Splash.route
                 ) {
+                    composable(Screen.Splash.route) {
+                        SplashScreen(
+                            onSplashFinished = {
+                                navController.navigate(Screen.Dashboard.route) {
+                                    popUpTo(Screen.Splash.route) { inclusive = true }
+                                }
+                            }
+                        )
+                    }
                     composable(Screen.Dashboard.route) {
                         VacuumScreen(viewModel = viewModel)
                     }

@@ -51,7 +51,10 @@ data class DustParticle(
 )
 
 @Composable
-fun SplashScreen(onSplashFinished: () -> Unit, isPreview: Boolean = false) {
+fun SplashScreen(
+    onSplashFinished: () -> Unit,
+    isPreview: Boolean = false
+) {
     var startAnimation by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -261,10 +264,12 @@ fun SplashScreen(onSplashFinished: () -> Unit, isPreview: Boolean = false) {
                     val rightAngleRad = (-90f + lidarSweepAngle + 18f) * kotlin.math.PI / 180.0
 
                     val lx = (cx + distance * kotlin.math.cos(leftAngleRad)).toFloat()
-                    val ly = (cy - vacuumRadius * 0.8f + distance * kotlin.math.sin(leftAngleRad)).toFloat()
+                    val ly =
+                        (cy - vacuumRadius * 0.8f + distance * kotlin.math.sin(leftAngleRad)).toFloat()
 
                     val rx = (cx + distance * kotlin.math.cos(rightAngleRad)).toFloat()
-                    val ry = (cy - vacuumRadius * 0.8f + distance * kotlin.math.sin(rightAngleRad)).toFloat()
+                    val ry =
+                        (cy - vacuumRadius * 0.8f + distance * kotlin.math.sin(rightAngleRad)).toFloat()
 
                     lineTo(lx, ly)
                     lineTo(rx, ry)
@@ -322,6 +327,7 @@ fun SplashScreen(onSplashFinished: () -> Unit, isPreview: Boolean = false) {
                                 center = Offset(drawX, drawY)
                             )
                         }
+
                         1 -> { // Crumb
                             val sizePx = particle.size.dp.toPx()
                             drawRect(
@@ -330,6 +336,7 @@ fun SplashScreen(onSplashFinished: () -> Unit, isPreview: Boolean = false) {
                                 size = Size(sizePx, sizePx)
                             )
                         }
+
                         2 -> { // Lint
                             val sizePx = particle.size.dp.toPx()
                             val length = sizePx * 1.6f
