@@ -21,4 +21,12 @@ class VacuumRepositoryImpl : VacuumRepository {
     override suspend fun fetchRooms(host: String, token: String): Result<List<Pair<Long, String>>> {
         return VacuumClient.fetchRooms(host, token)
     }
+
+    override suspend fun stopCleaning(host: String, token: String): Result<String> {
+        return VacuumClient.sendStopCommand(host, token)
+    }
+
+    override suspend fun dockVacuum(host: String, token: String): Result<String> {
+        return VacuumClient.sendDockCommand(host, token)
+    }
 }

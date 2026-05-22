@@ -10,6 +10,8 @@ import com.vahitkeskin.loopsweep.domain.usecase.CleanRoomUseCase
 import com.vahitkeskin.loopsweep.domain.usecase.GetRoomsUseCase
 import com.vahitkeskin.loopsweep.domain.usecase.GetVacuumPropertiesUseCase
 import com.vahitkeskin.loopsweep.domain.usecase.GetVacuumTelemetryUseCase
+import com.vahitkeskin.loopsweep.domain.usecase.StopVacuumUseCase
+import com.vahitkeskin.loopsweep.domain.usecase.DockVacuumUseCase
 import com.vahitkeskin.loopsweep.utils.Constants
 import com.vahitkeskin.loopsweep.utils.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +28,8 @@ class VacuumViewModel(
     private val getVacuumPropertiesUseCase: GetVacuumPropertiesUseCase,
     private val getVacuumTelemetryUseCase: GetVacuumTelemetryUseCase,
     private val getRoomsUseCase: GetRoomsUseCase,
+    private val stopVacuumUseCase: StopVacuumUseCase,
+    private val dockVacuumUseCase: DockVacuumUseCase,
     private val dataStore: DataStore<Preferences>
 ) : ViewModel() {
 
@@ -345,6 +349,56 @@ class VacuumViewModel(
                     val msg = "Hata: ${error.message ?: "Bilinmeyen Bağlantı Hatası"}"
                     _statusMessage.value = msg
                     addLog("Hata oluştu: ${error.message}")
+                    Logger.e("VacuumViewModel", msg, error)
+                }
+            )
+            _isLoading.value = false
+        }
+    }
+
+    fun stopCleaning() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _statusMessage.value = "Durdurma komutu gönderiliyor..."
+            addLog("Komut gönderiliyor: Temizliği Durdur")
+            val result = stopVacuumUseCase(
+                host = ipAddress.value,
+                token = token.value
+            )
+            result.fold(
+                onSuccess = {
+                    _statusMessage.value = "Temizlik durduruldu."
+                    addLog("Komut onaylandı. Süpürge durdu.")
+                },
+                onFailure = { error ->
+                    val msg = "Hata: ${error.message ?: "Bilinmeyen Bağlantı Hatası"}"
+                    _statusMessage.value = msg
+                    addLog("Durdurma hatası: ${error.message}")
+                    Logger.e("VacuumViewModel", msg, error)
+                }
+            )
+            _isLoading.value = false
+        }
+    }
+
+    fun returnToDock() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _statusMessage.value = "Şarj istasyonuna dönüş komutu gönderiliyor..."
+            addLog("Komut gönderiliyor: Şarj İstasyonuna Dön")
+            val result = dockVacuumUseCase(
+                host = ipAddress.value,
+                token = token.value
+            )
+            result.fold(
+                onSuccess = {
+                    _statusMessage.value = "Şarj istasyonuna dönüyor."
+                    addLog("Komut onaylandı. Süpürge şarj istasyonuna dönüyor.")
+                },
+                onFailure = { error ->
+                    val msg = "Hata: ${error.message ?: "Bilinmeyen Bağlantı Hatası"}"
+                    _statusMessage.value = msg
+                    addLog("Dock hatası: ${error.message}")
                     Logger.e("VacuumViewModel", msg, error)
                 }
             )

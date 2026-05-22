@@ -8,4 +8,6 @@ interface VacuumRepository {
     suspend fun getProperties(host: String, token: String): Result<VacuumProperties>
     suspend fun getTelemetry(host: String, token: String): Result<VacuumTelemetry>
     suspend fun fetchRooms(host: String, token: String): Result<List<Pair<Long, String>>>
+    suspend fun stopCleaning(host: String, token: String): Result<String>
+    suspend fun dockVacuum(host: String, token: String): Result<String>
 }

@@ -1,11 +1,19 @@
 package com.vahitkeskin.loopsweep
 
 import androidx.compose.foundation.background
-
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +55,8 @@ fun VacuumApp() {
             getVacuumPropertiesUseCase = appContainer.getVacuumPropertiesUseCase,
             getVacuumTelemetryUseCase = appContainer.getVacuumTelemetryUseCase,
             getRoomsUseCase = appContainer.getRoomsUseCase,
+            stopVacuumUseCase = appContainer.stopVacuumUseCase,
+            dockVacuumUseCase = appContainer.dockVacuumUseCase,
             dataStore = appContainer.dataStore
         )
     }
@@ -84,6 +94,12 @@ fun VacuumApp() {
                     isCharging = isCharging,
                     onCleanClicked = {
                         viewModel.cleanRoom(99, 1, isAllAreas = true)
+                    },
+                    onStopClicked = {
+                        viewModel.stopCleaning()
+                    },
+                    onDockClicked = {
+                        viewModel.returnToDock()
                     }
                 )
             },
@@ -234,13 +250,16 @@ fun PurchaseIcon(color: Color) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GlassmorphicBottomNavigation(
     currentScreen: Screen,
     onScreenSelected: (Screen) -> Unit,
     isCleaning: Boolean,
     isCharging: Boolean,
-    onCleanClicked: () -> Unit
+    onCleanClicked: () -> Unit,
+    onStopClicked: () -> Unit,
+    onDockClicked: () -> Unit
 ) {
     val barHeight = 80.dp
     val buttonSize = 58.dp
@@ -401,14 +420,16 @@ fun GlassmorphicBottomNavigation(
         }
 
         // 3. The Robot Vacuum Button - positioned absolutely over the cutout
+        var showMenu by remember { mutableStateOf(false) }
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = 16.dp) // Slightly higher padding for visible gap from cutout
                 .size(buttonSize)
-                .clickable {
-                    onCleanClicked()
-                },
+                .combinedClickable(
+                    onClick = { onCleanClicked() },
+                    onLongClick = { showMenu = true }
+                ),
             contentAlignment = Alignment.Center
         ) {
             RobotVacuumButtonContent(
@@ -426,6 +447,142 @@ fun GlassmorphicBottomNavigation(
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 9.dp)
             )
+
+            // Long-press balloon popup
+            if (showMenu) {
+                VacuumControlBalloon(
+                    buttonSizePx = with(LocalDensity.current) { buttonSize.roundToPx() },
+                    onDismiss = { showMenu = false },
+                    onStopClicked = { showMenu = false; onStopClicked() },
+                    onDockClicked = { showMenu = false; onDockClicked() }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun VacuumControlBalloon(
+    buttonSizePx: Int,
+    onDismiss: () -> Unit,
+    onStopClicked: () -> Unit,
+    onDockClicked: () -> Unit
+) {
+    val arrowHeightDp = 14.dp
+    val balloonColor = Color(0xFF141C30)
+    val borderColor = Color(0xFF3D4A6B)
+
+    Popup(
+        alignment = Alignment.BottomCenter,
+        offset = IntOffset(0, -(buttonSizePx + with(LocalDensity.current) { 6.dp.roundToPx() })),
+        onDismissRequest = onDismiss,
+        properties = PopupProperties(focusable = true)
+    ) {
+        Box(
+            modifier = Modifier
+                .width(230.dp)
+                .wrapContentHeight()
+                .drawBehind {
+                    val arrowH = arrowHeightDp.toPx()
+                    val bodyH = size.height - arrowH
+                    val cornerR = CornerRadius(14.dp.toPx())
+                    val cx = size.width / 2f
+                    val arrowW = 24.dp.toPx()
+
+                    // Drop shadow
+                    drawRoundRect(
+                        color = Color.Black.copy(alpha = 0.35f),
+                        topLeft = Offset(3.dp.toPx(), 3.dp.toPx()),
+                        size = Size(size.width, bodyH),
+                        cornerRadius = cornerR
+                    )
+                    // Body fill
+                    drawRoundRect(
+                        color = balloonColor,
+                        size = Size(size.width, bodyH),
+                        cornerRadius = cornerR
+                    )
+                    // Body border
+                    drawRoundRect(
+                        color = borderColor,
+                        size = Size(size.width, bodyH),
+                        cornerRadius = cornerR,
+                        style = Stroke(width = 1.dp.toPx())
+                    )
+                    // Cover the full bottom border line so the triangle base has no horizontal line.
+                    // The corners are 14dp from edge so starting at 0f is safe (corner curves end there).
+                    drawRect(
+                        color = balloonColor,
+                        topLeft = Offset(0f, bodyH - 1.dp.toPx()),
+                        size = Size(size.width, 1.dp.toPx() + 1f)
+                    )
+                    // Arrow fill (triangle pointing down)
+                    val arrowFillPath = Path().apply {
+                        moveTo(cx - arrowW / 2f, bodyH)
+                        lineTo(cx + arrowW / 2f, bodyH)
+                        lineTo(cx, bodyH + arrowH)
+                        close()
+                    }
+                    drawPath(arrowFillPath, balloonColor)
+                    // Arrow border (only the two slanted edges — no base line)
+                    val arrowBorderPath = Path().apply {
+                        moveTo(cx - arrowW / 2f, bodyH)
+                        lineTo(cx, bodyH + arrowH)
+                        lineTo(cx + arrowW / 2f, bodyH)
+                    }
+                    drawPath(
+                        path = arrowBorderPath,
+                        color = borderColor,
+                        style = Stroke(width = 1.dp.toPx())
+                    )
+                }
+                .padding(bottom = arrowHeightDp)
+                .padding(10.dp)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                // ⏹️ Durdur button
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(Color(0xFF7F1D1D), Color(0xFFEF4444))
+                            ),
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        .clickable { onStopClicked() }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "⏹️  Durdur",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                }
+                // 🏠 Şarj İstasyonuna Dön button
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(Color(0xFF92400E), Color(0xFFFBBF24))
+                            ),
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        .clickable { onDockClicked() }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "🏠  Şarj İstasyonuna Dön",
+                        color = Color(0xFF1A0A00),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
+                    )
+                }
+            }
         }
     }
 }

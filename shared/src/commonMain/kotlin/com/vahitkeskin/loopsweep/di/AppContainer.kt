@@ -6,6 +6,8 @@ import com.vahitkeskin.loopsweep.domain.usecase.CleanRoomUseCase
 import com.vahitkeskin.loopsweep.domain.usecase.GetVacuumPropertiesUseCase
 import com.vahitkeskin.loopsweep.domain.usecase.GetVacuumTelemetryUseCase
 import com.vahitkeskin.loopsweep.domain.usecase.GetRoomsUseCase
+import com.vahitkeskin.loopsweep.domain.usecase.StopVacuumUseCase
+import com.vahitkeskin.loopsweep.domain.usecase.DockVacuumUseCase
 import com.vahitkeskin.loopsweep.data.local.createDataStore
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -33,6 +35,14 @@ class AppContainer {
 
     val getRoomsUseCase: GetRoomsUseCase by lazy {
         GetRoomsUseCase(vacuumRepository)
+    }
+
+    val stopVacuumUseCase: StopVacuumUseCase by lazy {
+        StopVacuumUseCase(vacuumRepository)
+    }
+
+    val dockVacuumUseCase: DockVacuumUseCase by lazy {
+        DockVacuumUseCase(vacuumRepository)
     }
 
     val xiaomiCloudClient: com.vahitkeskin.loopsweep.data.network.XiaomiCloudClient by lazy {

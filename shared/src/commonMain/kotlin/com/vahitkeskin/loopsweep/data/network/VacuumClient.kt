@@ -167,6 +167,84 @@ object VacuumClient {
         }
     }
 
+    suspend fun sendStopCommand(host: String, tokenHex: String): Result<String> {
+        return try {
+            val tokenBytes = tokenHex.hexToByteArray()
+            if (tokenBytes.size != 16) {
+                return Result.failure(Exception("Token must be exactly 32 hex characters"))
+            }
+            val helloPacket = buildHelloPacket()
+            val helloResponse = sendUdp(host, Constants.VACUUM_PORT, helloPacket, timeoutMs = 2000)
+                ?: return Result.failure(Exception("Handshake failed."))
+            if (helloResponse.size < 32) return Result.failure(Exception("Invalid handshake response."))
+            val deviceId = helloResponse.copyOfRange(8, 12)
+            val stamp = helloResponse.readInt32BE(12)
+            val deviceIdLong = (helloResponse.readInt32BE(8).toLong()) and 0xFFFFFFFFL
+            val didStr = deviceIdLong.toString()
+            val key = MD5.hash(tokenBytes)
+            val iv = MD5.hash(key + tokenBytes)
+            // siid:2, aiid:2 = Stop / Pause cleaning
+            val jsonPayload = "{\"id\":1,\"method\":\"action\",\"params\":{\"did\":\"$didStr\",\"siid\":2,\"aiid\":2,\"in\":[]}}"
+            Logger.i("VacuumClient", "Komut: Durdur (siid=2, aiid=2)")
+            val payloadBytes = jsonPayload.encodeToByteArray()
+            val encryptedPayload = encryptAes128Cbc(payloadBytes, key, iv)
+            val commandPacket = buildCommandPacket(deviceId, stamp + 1, tokenBytes, encryptedPayload)
+            val responsePacket = sendUdp(host, Constants.VACUUM_PORT, commandPacket, timeoutMs = 3000)
+                ?: return Result.failure(Exception("Stop command sent, but vacuum did not respond."))
+            if (responsePacket.size < 32) return Result.failure(Exception("Received corrupted response."))
+            val encryptedResponsePayload = responsePacket.copyOfRange(32, responsePacket.size)
+            if (encryptedResponsePayload.isEmpty()) {
+                Result.success("Success (Ack)")
+            } else {
+                val decrypted = decryptAes128Cbc(encryptedResponsePayload, key, iv)
+                val responseString = decrypted.decodeToString()
+                Logger.i("VacuumClient", "Stop response: $responseString")
+                Result.success(responseString)
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun sendDockCommand(host: String, tokenHex: String): Result<String> {
+        return try {
+            val tokenBytes = tokenHex.hexToByteArray()
+            if (tokenBytes.size != 16) {
+                return Result.failure(Exception("Token must be exactly 32 hex characters"))
+            }
+            val helloPacket = buildHelloPacket()
+            val helloResponse = sendUdp(host, Constants.VACUUM_PORT, helloPacket, timeoutMs = 2000)
+                ?: return Result.failure(Exception("Handshake failed."))
+            if (helloResponse.size < 32) return Result.failure(Exception("Invalid handshake response."))
+            val deviceId = helloResponse.copyOfRange(8, 12)
+            val stamp = helloResponse.readInt32BE(12)
+            val deviceIdLong = (helloResponse.readInt32BE(8).toLong()) and 0xFFFFFFFFL
+            val didStr = deviceIdLong.toString()
+            val key = MD5.hash(tokenBytes)
+            val iv = MD5.hash(key + tokenBytes)
+            // siid:2, aiid:3 = Return to charging dock
+            val jsonPayload = "{\"id\":1,\"method\":\"action\",\"params\":{\"did\":\"$didStr\",\"siid\":2,\"aiid\":3,\"in\":[]}}"
+            Logger.i("VacuumClient", "Komut: Şarj İstasyonuna Dön (siid=2, aiid=3)")
+            val payloadBytes = jsonPayload.encodeToByteArray()
+            val encryptedPayload = encryptAes128Cbc(payloadBytes, key, iv)
+            val commandPacket = buildCommandPacket(deviceId, stamp + 1, tokenBytes, encryptedPayload)
+            val responsePacket = sendUdp(host, Constants.VACUUM_PORT, commandPacket, timeoutMs = 3000)
+                ?: return Result.failure(Exception("Dock command sent, but vacuum did not respond."))
+            if (responsePacket.size < 32) return Result.failure(Exception("Received corrupted response."))
+            val encryptedResponsePayload = responsePacket.copyOfRange(32, responsePacket.size)
+            if (encryptedResponsePayload.isEmpty()) {
+                Result.success("Success (Ack)")
+            } else {
+                val decrypted = decryptAes128Cbc(encryptedResponsePayload, key, iv)
+                val responseString = decrypted.decodeToString()
+                Logger.i("VacuumClient", "Dock response: $responseString")
+                Result.success(responseString)
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 
     fun parsePropertyValue(json: String, siid: Int, piid: Int): Int? {
         try {

@@ -2,16 +2,20 @@ package com.vahitkeskin.loopsweep.ui.screen
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vahitkeskin.loopsweep.presentation.VacuumViewModel
@@ -38,6 +42,10 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
     val areaHistoryState by viewModel.areaHistory.collectAsState()
     val eventLogState by viewModel.eventLog.collectAsState()
     val distanceState by viewModel.distanceMeters.collectAsState()
+    val isCleaning = remember(telemetryState) {
+        val sc = telemetryState?.statusCode
+        sc == 5 || sc == 6 || sc == 7 || sc == 3
+    }
     
     // Dynamic rooms from ViewModel (starts as DEFAULT_ROOMS, updates when device responds)
     val rooms by viewModel.rooms.collectAsStateWithLifecycle()
@@ -103,6 +111,60 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
             )
             
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Quick control buttons - visible when vacuum is active
+            if (isCleaning) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Durdur button
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .background(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(Color(0xFF7F1D1D), Color(0xFFEF4444))
+                                ),
+                                shape = RoundedCornerShape(14.dp)
+                            )
+                            .clickable { viewModel.stopCleaning() }
+                            .padding(vertical = 14.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "⏹️  Durdur",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    // Şarj İstasyonuna Dön button
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .background(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(Color(0xFF78350F), Color(0xFFFBBF24))
+                                ),
+                                shape = RoundedCornerShape(14.dp)
+                            )
+                            .clickable { viewModel.returnToDock() }
+                            .padding(vertical = 14.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "🏠  Şarj İstasyonu",
+                            color = Color(0xFF1A0F00),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
             RealisticRadarCard(
                 isVisible = isRadarVisibleState,
