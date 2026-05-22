@@ -2,7 +2,9 @@
   <img src="shared/src/commonMain/composeResources/files/robot_static.png" alt="LoopSweep Static Logo" width="200" height="200" style="margin-top: 10px;" />
   
   <br/>
-  <h3><a href="README.md" style="text-decoration:none;">🟢 START</a> &nbsp;&nbsp;|&nbsp;&nbsp; ⚪️ <b>PAUSE</b></h3>
+  <a href="README.md"><img src="https://img.shields.io/badge/▶_START-222222?style=for-the-badge" alt="Start" /></a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="README_PAUSED.md"><img src="https://img.shields.io/badge/⏸_PAUSED-F3F4F6?style=for-the-badge" alt="Pause" /></a>
   <br/>
 
   # 🧹 LoopSweep
