@@ -1,15 +1,20 @@
 <div align="center">
-  <img src="shared/src/commonMain/composeResources/files/robot_animated.gif" alt="LoopSweep Animated Logo" width="200" height="200" style="margin-top: 10px;" />
-  
-  <br/>
-  <a href="README.md"><img src="https://img.shields.io/badge/▶_CLEANING-10B981?style=for-the-badge" alt="Start" /></a>
-  &nbsp;&nbsp;&nbsp;
-  <a href="README_PAUSED.md"><img src="https://img.shields.io/badge/⏸_PAUSE-222222?style=for-the-badge" alt="Pause" /></a>
-  <br/>
+  <h1>🧹 LoopSweep</h1>
+  <p><strong>A Next-Generation, Beautifully Crafted Robot Vacuum Controller built with Compose Multiplatform.</strong></p>
 
-  # 🧹 LoopSweep
-  **A Next-Generation, Beautifully Crafted Robot Vacuum Controller built with Compose Multiplatform.**
-  
+  <table align="center" style="border-collapse: collapse; border: none; margin: 20px 0;">
+    <tr style="border: none;">
+      <td align="center" style="border: none; padding: 20px;">
+        <img src="shared/src/commonMain/composeResources/files/robot_animated.gif" alt="LoopSweep Cleaning State" width="180" height="180" /><br/>
+        <img src="https://img.shields.io/badge/▶_CLEANING-10B981?style=for-the-badge" alt="Cleaning State" style="margin-top: 10px;" />
+      </td>
+      <td align="center" style="border: none; padding: 20px;">
+        <img src="shared/src/commonMain/composeResources/files/robot_static.png" alt="LoopSweep Paused State" width="180" height="180" /><br/>
+        <img src="https://img.shields.io/badge/⏸_PAUSED-222222?style=for-the-badge" alt="Paused State" style="margin-top: 10px;" />
+      </td>
+    </tr>
+  </table>
+
   [![Kotlin](https://img.shields.io/badge/kotlin-2.3.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
   [![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.11.0-green.svg)](https://www.jetbrains.com/lp/compose-mpp/)
   [![Platform: Android](https://img.shields.io/badge/platform-Android-3DDC84.svg?logo=android)](#)
