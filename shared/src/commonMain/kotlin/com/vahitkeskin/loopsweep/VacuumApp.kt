@@ -683,32 +683,51 @@ fun RobotVacuumButtonContent(
         rotate(degrees = brushAngle, pivot = Offset(brushHubX, brushHubY)) {
             for (i in 0 until 3) {
                 val angleRad = (i * 120f * 3.14159f / 180f)
-                val armLen = 12.dp.toPx()
+                val armLen = 22.dp.toPx()
                 val armEndX = brushHubX + armLen * kotlin.math.cos(angleRad)
                 val armEndY = brushHubY + armLen * kotlin.math.sin(angleRad)
                 
-                // Draw arm shaft
-                drawLine(
-                    color = Color(0xFF141517),
-                    start = Offset(brushHubX, brushHubY),
-                    end = Offset(armEndX, armEndY),
-                    strokeWidth = 2.dp.toPx()
+                // Curved arm shaft
+                val path = Path().apply {
+                    moveTo(brushHubX, brushHubY)
+                    // quadratic bezier for curved arm (swirl effect)
+                    val cpX = brushHubX + armLen * 0.6f * kotlin.math.cos(angleRad - 0.4f)
+                    val cpY = brushHubY + armLen * 0.6f * kotlin.math.sin(angleRad - 0.4f)
+                    quadraticBezierTo(cpX, cpY, armEndX, armEndY)
+                }
+                drawPath(
+                    path = path,
+                    color = Color(0xFF111111),
+                    style = Stroke(width = 3.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
                 )
                 
                 // Bristles fanning out
-                for (j in -1..1) {
-                    val brAngle = angleRad + j * 0.22f
-                    val brLen = 5.dp.toPx()
+                for (j in -4..4) {
+                    val brAngle = angleRad + j * 0.08f
+                    val brLen = 10.dp.toPx()
                     val brEndX = armEndX + brLen * kotlin.math.cos(brAngle)
                     val brEndY = armEndY + brLen * kotlin.math.sin(brAngle)
                     drawLine(
-                        color = Color(0xFF6B7280),
+                        color = Color(0xFF555555),
                         start = Offset(armEndX, armEndY),
                         end = Offset(brEndX, brEndY),
-                        strokeWidth = 1.dp.toPx()
+                        strokeWidth = 0.5f.dp.toPx(),
+                        cap = androidx.compose.ui.graphics.StrokeCap.Round
                     )
                 }
             }
+            // Draw central hub
+            drawCircle(
+                color = Color(0xFF111111),
+                radius = 4.dp.toPx(),
+                center = Offset(brushHubX, brushHubY)
+            )
+            // Draw yellow screw
+            drawCircle(
+                color = Color(0xFFE6C200),
+                radius = 1.5f.dp.toPx(),
+                center = Offset(brushHubX, brushHubY)
+            )
         }
 
         // --- DRAW MAIN BODY ---
