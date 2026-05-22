@@ -383,7 +383,7 @@ fun GlassmorphicBottomNavigation(
                 Spacer(modifier = Modifier.height(32.dp))
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Scan",
+                    text = "Start",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF787880)
@@ -436,17 +436,6 @@ fun GlassmorphicBottomNavigation(
             RobotVacuumButtonContent(
                 isCleaning = isCleaning,
                 isCharging = isCharging
-            )
-
-            Text(
-                text = "LOOP SWEEP",
-                fontSize = 3.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White.copy(alpha = 0.5f),
-                letterSpacing = 0.5.sp,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 10.dp)
             )
 
             // Long-press balloon popup

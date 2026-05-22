@@ -11,7 +11,9 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,7 +28,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.vahitkeskin.loopsweep.utils.LoopSweepPreview
 
 @Composable
@@ -125,24 +129,28 @@ fun RobotVacuumButtonContent(
         lines
     }
 
-    Canvas(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
         val w = size.width
         val h = size.height
         val cx = w / 2f
         val cy = h / 2f
-        val r = minOf(w, h) / 2f - 4.dp.toPx() // Keep a small margin for side brush to extend outside the main body!
+        val r = minOf(
+            w,
+            h
+        ) / 2f - 4.dp.toPx() // Keep a small margin for side brush to extend outside the main body!
 
         // --- DRAW SIDE BRUSH UNDER THE BODY ---
         val brushHubX = cx + r * 0.76f
         val brushHubY = cy - r * 0.52f
-        
+
         rotate(degrees = brushAngle, pivot = Offset(brushHubX, brushHubY)) {
             for (i in 0 until 3) {
                 val angleRad = (i * 120f * 3.14159f / 180f)
                 val armLen = 10.dp.toPx()
                 val armEndX = brushHubX + armLen * kotlin.math.cos(angleRad)
                 val armEndY = brushHubY + armLen * kotlin.math.sin(angleRad)
-                
+
                 // Curved arm shaft
                 val path = Path().apply {
                     moveTo(brushHubX, brushHubY)
@@ -154,9 +162,12 @@ fun RobotVacuumButtonContent(
                 drawPath(
                     path = path,
                     color = Color(0xFF111111),
-                    style = Stroke(width = 1.5f.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                    style = Stroke(
+                        width = 1.5f.dp.toPx(),
+                        cap = androidx.compose.ui.graphics.StrokeCap.Round
+                    )
                 )
-                
+
                 // Bristles fanning out
                 for (j in -4..4) {
                     val brSpread = if (isCleaning) 0.12f else 0.08f
@@ -306,7 +317,7 @@ fun RobotVacuumButtonContent(
         val powerY = btnPillTop + btnPillH * 0.3f
         val pIconR = 1.0.dp.toPx()
         val powerColor = if (isCleaning) Color(0xFF10B981) else Color(0xFFD1D5DB)
-        
+
         if (isCleaning) {
             // green glow animation
             drawCircle(
@@ -381,12 +392,12 @@ fun RobotVacuumButtonContent(
                 Color(0xFF1F2937),
                 Color(0xFFD1D5DB)
             ),
-            start = Offset(cx - bezelW/2, lidarY - bezelH/2),
-            end = Offset(cx + bezelW/2, lidarY + bezelH/2)
+            start = Offset(cx - bezelW / 2, lidarY - bezelH / 2),
+            end = Offset(cx + bezelW / 2, lidarY + bezelH / 2)
         )
         drawRoundRect(
             brush = chromeBrush,
-            topLeft = Offset(cx - bezelW/2, lidarY - bezelH/2),
+            topLeft = Offset(cx - bezelW / 2, lidarY - bezelH / 2),
             size = Size(bezelW, bezelH),
             cornerRadius = CornerRadius(lidarCR + 0.8.dp.toPx(), lidarCR + 0.8.dp.toPx())
         )
@@ -394,7 +405,7 @@ fun RobotVacuumButtonContent(
         // 2. Inner Black Face
         drawRoundRect(
             color = Color(0xFF141517),
-            topLeft = Offset(cx - lidarW/2, lidarY - lidarH/2),
+            topLeft = Offset(cx - lidarW / 2, lidarY - lidarH / 2),
             size = Size(lidarW, lidarH),
             cornerRadius = CornerRadius(lidarCR, lidarCR)
         )
@@ -435,6 +446,18 @@ fun RobotVacuumButtonContent(
             style = Stroke(width = 1.dp.toPx())
         )
     }
+
+    Text(
+        text = "LOOP SWEEP",
+        fontSize = 3.sp,
+        fontWeight = FontWeight.Bold,
+        color = Color.White.copy(alpha = 0.5f),
+        letterSpacing = 0.5.sp,
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .padding(bottom = 10.dp)
+    )
+}
 }
 
 @LoopSweepPreview
