@@ -11,8 +11,18 @@ struct ComposeView: UIViewControllerRepresentable {
 }
 
 struct ContentView: View {
+    @State private var isStatusBarVisible = false
+
     var body: some View {
         ComposeView()
             .ignoresSafeArea()
+            .statusBarHidden(!isStatusBarVisible)
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("SystemBarsVisibilityNotification"))) { notification in
+                if let visible = notification.userInfo?["visible"] as? Bool {
+                    withAnimation(.easeInOut(duration: 0.8)) {
+                        self.isStatusBarVisible = visible
+                    }
+                }
+            }
     }
 }

@@ -1,12 +1,7 @@
 package com.vahitkeskin.loopsweep
 
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.core.*
+import androidx.compose.animation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -127,7 +122,18 @@ fun VacuumApp() {
     ) {
         Scaffold(
             bottomBar = {
-                if (currentRoute != Screen.Splash.route) {
+                val isVisible = currentRoute != Screen.Splash.route
+                AnimatedVisibility(
+                    visible = isVisible,
+                    enter = slideInVertically(
+                        initialOffsetY = { it },
+                        animationSpec = tween(durationMillis = 800, easing = LinearOutSlowInEasing)
+                    ) + fadeIn(animationSpec = tween(800)),
+                    exit = slideOutVertically(
+                        targetOffsetY = { it },
+                        animationSpec = tween(durationMillis = 500)
+                    ) + fadeOut(animationSpec = tween(500))
+                ) {
                     GlassmorphicBottomNavigation(
                         currentRoute = currentRoute,
                         onRouteSelected = { route ->
@@ -164,7 +170,12 @@ fun VacuumApp() {
                     navController = navController,
                     startDestination = Screen.Splash.route
                 ) {
-                    composable(Screen.Splash.route) {
+                    composable(
+                        route = Screen.Splash.route,
+                        exitTransition = {
+                            fadeOut(animationSpec = tween(800, easing = LinearOutSlowInEasing))
+                        }
+                    ) {
                         SplashScreen(
                             onSplashFinished = {
                                 navController.navigate(Screen.Dashboard.route) {
@@ -173,10 +184,26 @@ fun VacuumApp() {
                             }
                         )
                     }
-                    composable(Screen.Dashboard.route) {
+                    composable(
+                        route = Screen.Dashboard.route,
+                        enterTransition = {
+                            fadeIn(animationSpec = tween(800, easing = LinearOutSlowInEasing))
+                        },
+                        exitTransition = {
+                            fadeOut(animationSpec = tween(500, easing = LinearOutSlowInEasing))
+                        }
+                    ) {
                         VacuumScreen(viewModel = viewModel)
                     }
-                    composable(Screen.Cloud.route) {
+                    composable(
+                        route = Screen.Cloud.route,
+                        enterTransition = {
+                            fadeIn(animationSpec = tween(500, easing = LinearOutSlowInEasing))
+                        },
+                        exitTransition = {
+                            fadeOut(animationSpec = tween(500, easing = LinearOutSlowInEasing))
+                        }
+                    ) {
                         XiaomiCloudScreen(
                             viewModel = cloudViewModel,
                             activeIp = activeIp,
@@ -245,6 +272,26 @@ fun GlassmorphicBottomNavigation(
     val barHeight = 84.dp
     val buttonSize = 60.dp
     val outerHeight = 128.dp
+
+    val infiniteTransition = rememberInfiniteTransition(label = "PulseInfinite")
+    val pulsingScale by infiniteTransition.animateFloat(
+        initialValue = 1.0f,
+        targetValue = 1.3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearOutSlowInEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "PulsingScale"
+    )
+    val pulsingAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.7f,
+        targetValue = 0.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearOutSlowInEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "PulsingAlpha"
+    )
 
     Box(
         modifier = Modifier
@@ -370,6 +417,18 @@ fun GlassmorphicBottomNavigation(
                                 .graphicsLayer {
                                     scaleX = tabScale
                                     scaleY = tabScale
+                                }
+                                .drawBehind {
+                                    if (isSelected) {
+                                        drawCircle(
+                                            brush = Brush.radialGradient(
+                                                colors = listOf(activeColor.copy(alpha = 0.22f), Color.Transparent),
+                                                center = Offset(size.width / 2f, size.height / 2f),
+                                                radius = 24.dp.toPx()
+                                            ),
+                                            radius = 24.dp.toPx()
+                                        )
+                                    }
                                 },
                             contentAlignment = Alignment.Center
                         ) {
@@ -384,14 +443,25 @@ fun GlassmorphicBottomNavigation(
                             letterSpacing = 0.5.sp
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        // Active status pill
+                        // Active status pill with neon glow shadow
                         Box(
                             modifier = Modifier
-                                .size(width = 12.dp, height = 3.dp)
-                                .background(
-                                    color = if (isSelected) AmberYellow else Color.Transparent,
-                                    shape = RoundedCornerShape(1.5.dp)
-                                )
+                                .size(width = 16.dp, height = 3.dp)
+                                .graphicsLayer {
+                                    alpha = if (isSelected) 1f else 0f
+                                }
+                                .drawBehind {
+                                    drawRoundRect(
+                                        color = AmberYellow,
+                                        cornerRadius = CornerRadius(1.5.dp.toPx(), 1.5.dp.toPx())
+                                    )
+                                    drawRoundRect(
+                                        color = AmberYellow.copy(alpha = 0.35f),
+                                        topLeft = Offset(-2.dp.toPx(), -1.dp.toPx()),
+                                        size = Size(size.width + 4.dp.toPx(), size.height + 2.dp.toPx()),
+                                        cornerRadius = CornerRadius(2.5.dp.toPx(), 2.5.dp.toPx())
+                                    )
+                                }
                         )
                     }
                 } else {
@@ -448,6 +518,24 @@ fun GlassmorphicBottomNavigation(
                 ),
             contentAlignment = Alignment.Center
         ) {
+            if (isCleaning) {
+                Box(
+                    modifier = Modifier
+                        .size(buttonSize)
+                        .graphicsLayer {
+                            scaleX = pulsingScale
+                            scaleY = pulsingScale
+                            alpha = pulsingAlpha
+                        }
+                        .background(
+                            brush = Brush.radialGradient(
+                                colors = listOf(EmeraldGreen.copy(alpha = 0.65f), Color.Transparent)
+                            ),
+                            shape = androidx.compose.foundation.shape.CircleShape
+                        )
+                )
+            }
+
             RobotVacuumButtonContent(
                 isCleaning = isCleaning,
                 isCharging = isCharging

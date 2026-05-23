@@ -56,17 +56,33 @@ fun SplashScreen(
     onSplashFinished: () -> Unit,
     isPreview: Boolean = false
 ) {
+    var isFadingOut by remember { mutableStateOf(false) }
+    var isSystemBarsVisible by remember { mutableStateOf(false) }
+
     if (!isPreview) {
-        SystemBarsVisibility(visible = false)
+        SystemBarsVisibility(visible = isSystemBarsVisible)
     }
 
     var startAnimation by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         startAnimation = true
-        delay(5800)
+        // Main animations run for 5.0 seconds
+        delay(5000)
+        // Begin fading out splash content
+        isFadingOut = true
+        // Trigger system bars to slide in
+        isSystemBarsVisible = true
+        // Wait for the fade-out to finish
+        delay(800)
         onSplashFinished()
     }
+
+    val fadeOutAlpha by animateFloatAsState(
+        targetValue = if (isFadingOut) 0f else 1f,
+        animationSpec = tween(durationMillis = 800, easing = LinearOutSlowInEasing),
+        label = "fadeOutAlpha"
+    )
 
     // Floor and text appearance animations
     val transition = updateTransition(targetState = startAnimation, label = "SplashTransition")
@@ -174,6 +190,7 @@ fun SplashScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .blur(radius = (cardAlpha * 16f).dp)
+                .graphicsLayer(alpha = fadeOutAlpha)
         ) {
             // Draw Hardwood Floor (Parke) and dynamic Dust
             Canvas(modifier = Modifier.fillMaxSize()) {
@@ -382,7 +399,9 @@ fun SplashScreen(
             logoAlpha = logoAlpha,
             subtitleAlpha = subtitleAlpha,
             shimmerTranslate = shimmerTranslate,
-            modifier = Modifier.align(Alignment.Center)
+            modifier = Modifier
+                .align(Alignment.Center)
+                .graphicsLayer(alpha = fadeOutAlpha)
         )
     }
 }
