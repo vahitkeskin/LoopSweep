@@ -23,6 +23,9 @@ class MainActivity : ComponentActivity() {
         windowInsetsController.isAppearanceLightStatusBars = false
         windowInsetsController.isAppearanceLightNavigationBars = false
 
+        // Keep screen on while the app is active
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         setContent {
             App()
         }

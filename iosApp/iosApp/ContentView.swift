@@ -24,5 +24,11 @@ struct ContentView: View {
                     }
                 }
             }
+            .onAppear {
+                UIApplication.shared.isIdleTimerDisabled = true
+            }
+            .onDisappear {
+                UIApplication.shared.isIdleTimerDisabled = false
+            }
     }
 }
