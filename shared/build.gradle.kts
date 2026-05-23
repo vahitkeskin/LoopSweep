@@ -75,6 +75,7 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.timber)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.androidx.core.ktx)
         }
         commonMain {
             kotlin.srcDir(generateBuildConfig)

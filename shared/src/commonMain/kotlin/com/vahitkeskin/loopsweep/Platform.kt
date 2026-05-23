@@ -7,3 +7,6 @@ interface Platform {
 expect fun getPlatform(): Platform
 
 expect fun getEpochSeconds(): Long
+
+@androidx.compose.runtime.Composable
+expect fun SystemBarsVisibility(visible: Boolean)

@@ -7,3 +7,8 @@ class JVMPlatform: Platform {
 actual fun getPlatform(): Platform = JVMPlatform()
 
 actual fun getEpochSeconds(): Long = System.currentTimeMillis() / 1000
+
+@androidx.compose.runtime.Composable
+actual fun SystemBarsVisibility(visible: Boolean) {
+    // No-op on JVM
+}

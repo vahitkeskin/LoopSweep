@@ -31,6 +31,7 @@ import com.vahitkeskin.loopsweep.ui.theme.PlankLineColor
 import com.vahitkeskin.loopsweep.ui.theme.DustDarkGray
 import com.vahitkeskin.loopsweep.ui.theme.DustMediumGray
 import com.vahitkeskin.loopsweep.ui.components.BrandingCard
+import com.vahitkeskin.loopsweep.SystemBarsVisibility
 import com.vahitkeskin.loopsweep.utils.LoopSweepPreview
 import kotlinx.coroutines.delay
 import loopsweep.shared.generated.resources.Res
@@ -55,6 +56,10 @@ fun SplashScreen(
     onSplashFinished: () -> Unit,
     isPreview: Boolean = false
 ) {
+    if (!isPreview) {
+        SystemBarsVisibility(visible = false)
+    }
+
     var startAnimation by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
