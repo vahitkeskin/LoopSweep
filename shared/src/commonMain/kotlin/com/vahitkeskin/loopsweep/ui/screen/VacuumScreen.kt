@@ -38,7 +38,7 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
     val deviceStatusState by viewModel.deviceStatusText.collectAsState()
     val isChargingState by viewModel.isCharging.collectAsState()
     
-    // Telemetry Dashboard Flow States
+    // Telemetry Flow States
     val telemetryState by viewModel.telemetry.collectAsState()
     val batteryHistoryState by viewModel.batteryHistory.collectAsState()
     val areaHistoryState by viewModel.areaHistory.collectAsState()
@@ -49,13 +49,12 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
         sc == 5 || sc == 6 || sc == 7 || sc == 3
     }
     
-    // Dynamic rooms from ViewModel (starts as DEFAULT_ROOMS, updates when device responds)
+    // Dynamic rooms from ViewModel
     val rooms by viewModel.rooms.collectAsStateWithLifecycle()
     val isRadarVisibleState by viewModel.isRadarVisible.collectAsState()
     val scrollState = rememberScrollState()
 
-    // Track repeat counts locally per room index: starts at 1, goes up to 3
-    // Re-initialized when rooms list size changes
+    // Track repeat counts locally per room index
     val repeatsState = remember(rooms.size) {
         mutableStateListOf<Int>().apply {
             addAll(List(rooms.size) { 1 })
@@ -65,7 +64,7 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(SpaceDarkBg) // Extremely premium space dark background
+            .background(SpaceDarkBg)
     ) {
         // Glowing background blobs for glassmorphic light refraction
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -126,7 +125,7 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
                             .weight(1f)
                             .background(
                                 brush = Brush.linearGradient(
-                                    colors = listOf(DarkRed, AlertRed)
+                                    colors = listOf(Color(0xFFE11D48), Color(0xFFFB7185))
                                 ),
                                 shape = RoundedCornerShape(14.dp)
                             )
@@ -148,7 +147,7 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
                             .weight(1f)
                             .background(
                                 brush = Brush.linearGradient(
-                                    colors = listOf(WarmBrown, AmberYellow)
+                                    colors = listOf(Color(0xFFD97706), Color(0xFFFBBF24))
                                 ),
                                 shape = RoundedCornerShape(14.dp)
                             )
@@ -158,7 +157,7 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
                     ) {
                         Text(
                             text = "🏠  Şarj İstasyonu",
-                            color = DeepBrown,
+                            color = Color.Black,
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
                             textAlign = TextAlign.Center
@@ -186,7 +185,7 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
                 modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
             )
             
-            // Rooms grid rendered sequentially in Rows to allow scroll inside the Column container
+            // Rooms grid rendered sequentially in Rows
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -206,9 +205,11 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
                                 onRoomClick = {
                                     viewModel.cleanRoom(room.id, currentRepeats, room.isAllAreas)
                                 },
-                                onStepperClick = {
-                                    // Increment repeats count: 1 -> 2 -> 3 -> 1
-                                    repeatsState[i] = if (currentRepeats >= 3) 1 else currentRepeats + 1
+                                onIncrementRepeats = {
+                                    repeatsState[i] = (currentRepeats + 1).coerceAtMost(3)
+                                },
+                                onDecrementRepeats = {
+                                    repeatsState[i] = (currentRepeats - 1).coerceAtLeast(1)
                                 },
                                 isLoading = isLoadingState
                             )
@@ -225,8 +226,11 @@ fun VacuumScreen(viewModel: VacuumViewModel) {
                                     onRoomClick = {
                                         viewModel.cleanRoom(room.id, currentRepeats, room.isAllAreas)
                                     },
-                                    onStepperClick = {
-                                        repeatsState[i + 1] = if (currentRepeats >= 3) 1 else currentRepeats + 1
+                                    onIncrementRepeats = {
+                                        repeatsState[i + 1] = (currentRepeats + 1).coerceAtMost(3)
+                                    },
+                                    onDecrementRepeats = {
+                                        repeatsState[i + 1] = (currentRepeats - 1).coerceAtLeast(1)
                                     },
                                     isLoading = isLoadingState
                                 )

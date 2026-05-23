@@ -23,49 +23,14 @@ sealed class BottomNavItem(
 ) {
     data object Dashboard : BottomNavItem(
         screen = Screen.Dashboard,
-        label = "Statistics",
+        label = "Dashboard",
         icon = { color -> StatisticsIcon(color = color) }
     )
     data object Cloud : BottomNavItem(
         screen = Screen.Cloud,
-        label = "Purchase",
-        icon = { color -> PurchaseIcon(color = color) }
+        label = "Mi Cloud",
+        icon = { color -> CloudIcon(color = color) }
     )
-}
-
-@Composable
-fun BarcodeIcon(color: Color = Color.Black) {
-    Canvas(modifier = Modifier.size(24.dp)) {
-        val w = size.width
-        val h = size.height
-        val strokeWidth = 2.dp.toPx()
-        drawLine(
-            color,
-            Offset(w * 0.15f, h * 0.2f),
-            Offset(w * 0.15f, h * 0.8f),
-            strokeWidth * 1.5f
-        )
-        drawLine(color, Offset(w * 0.3f, h * 0.2f), Offset(w * 0.3f, h * 0.8f), strokeWidth * 0.5f)
-        drawLine(
-            color,
-            Offset(w * 0.42f, h * 0.2f),
-            Offset(w * 0.42f, h * 0.8f),
-            strokeWidth * 1.2f
-        )
-        drawLine(
-            color,
-            Offset(w * 0.55f, h * 0.2f),
-            Offset(w * 0.55f, h * 0.8f),
-            strokeWidth * 0.8f
-        )
-        drawLine(color, Offset(w * 0.7f, h * 0.2f), Offset(w * 0.7f, h * 0.8f), strokeWidth * 1.6f)
-        drawLine(
-            color,
-            Offset(w * 0.85f, h * 0.2f),
-            Offset(w * 0.85f, h * 0.8f),
-            strokeWidth * 0.5f
-        )
-    }
 }
 
 @Composable
@@ -73,63 +38,111 @@ fun StatisticsIcon(color: Color) {
     Canvas(modifier = Modifier.size(24.dp)) {
         val w = size.width
         val h = size.height
-        val barWidth = w / 4f
-        val spacing = w / 8f
+        val barWidth = w * 0.22f
+        val spacing = w * 0.08f
+        val strokeWidth = 1.5.dp.toPx()
 
+        // Draw 3 glowing columns with rounded tops
+        // Bar 1 (Left)
+        drawRoundRect(
+            color = color.copy(alpha = 0.25f),
+            topLeft = Offset(spacing, h * 0.5f),
+            size = Size(barWidth, h * 0.4f),
+            cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx())
+        )
         drawRoundRect(
             color = color,
             topLeft = Offset(spacing, h * 0.5f),
-            size = Size(barWidth, h * 0.5f),
-            cornerRadius = CornerRadius(2.dp.toPx(), 2.dp.toPx())
-        )
-        drawRoundRect(
-            color = color,
-            topLeft = Offset(spacing * 2 + barWidth, h * 0.2f),
-            size = Size(barWidth, h * 0.8f),
-            cornerRadius = CornerRadius(2.dp.toPx(), 2.dp.toPx())
-        )
-        drawRoundRect(
-            color = color,
-            topLeft = Offset(spacing * 3 + barWidth * 2, h * 0.6f),
             size = Size(barWidth, h * 0.4f),
-            cornerRadius = CornerRadius(2.dp.toPx(), 2.dp.toPx())
+            cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx()),
+            style = Stroke(width = strokeWidth)
+        )
+
+        // Bar 2 (Middle, Tall)
+        drawRoundRect(
+            color = color.copy(alpha = 0.25f),
+            topLeft = Offset(spacing * 2 + barWidth, h * 0.25f),
+            size = Size(barWidth, h * 0.65f),
+            cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx())
+        )
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(spacing * 2 + barWidth, h * 0.25f),
+            size = Size(barWidth, h * 0.65f),
+            cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx()),
+            style = Stroke(width = strokeWidth)
+        )
+
+        // Bar 3 (Right)
+        drawRoundRect(
+            color = color.copy(alpha = 0.25f),
+            topLeft = Offset(spacing * 3 + barWidth * 2, h * 0.4f),
+            size = Size(barWidth, h * 0.5f),
+            cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx())
+        )
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(spacing * 3 + barWidth * 2, h * 0.4f),
+            size = Size(barWidth, h * 0.5f),
+            cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx()),
+            style = Stroke(width = strokeWidth)
+        )
+
+        // Subtle diagonal trend line passing over the bars for a high-tech finish
+        val trendPath = Path().apply {
+            moveTo(spacing + barWidth / 2f, h * 0.65f)
+            lineTo(spacing * 2 + barWidth * 1.5f, h * 0.45f)
+            lineTo(spacing * 3 + barWidth * 2.5f, h * 0.55f)
+        }
+        drawPath(
+            path = trendPath,
+            color = color.copy(alpha = 0.7f),
+            style = Stroke(width = 1.5.dp.toPx())
         )
     }
 }
 
 @Composable
-fun PurchaseIcon(color: Color) {
+fun CloudIcon(color: Color) {
     Canvas(modifier = Modifier.size(24.dp)) {
         val w = size.width
         val h = size.height
         val strokeWidth = 2.dp.toPx()
 
-        val pathHandle = Path().apply {
-            moveTo(w * 0.25f, h * 0.5f)
-            quadraticTo(w * 0.5f, h * 0.1f, w * 0.75f, h * 0.5f)
+        // Clean modern vector cloud shape
+        val cloudPath = Path().apply {
+            moveTo(w * 0.3f, h * 0.7f)
+            // Left small bump
+            cubicTo(w * 0.12f, h * 0.7f, w * 0.12f, h * 0.48f, w * 0.32f, h * 0.48f)
+            // Top main dome
+            cubicTo(w * 0.32f, h * 0.22f, w * 0.68f, h * 0.22f, w * 0.68f, h * 0.48f)
+            // Right medium bump
+            cubicTo(w * 0.88f, h * 0.48f, w * 0.88f, h * 0.7f, w * 0.7f, h * 0.7f)
+            close()
         }
+
+        // Semi-transparent fill
         drawPath(
-            path = pathHandle,
+            path = cloudPath,
+            color = color.copy(alpha = 0.2f)
+        )
+        // Solid outline
+        drawPath(
+            path = cloudPath,
             color = color,
             style = Stroke(width = strokeWidth)
         )
 
-        val pathBasket = Path().apply {
-            moveTo(w * 0.15f, h * 0.5f)
-            lineTo(w * 0.85f, h * 0.5f)
-            lineTo(w * 0.75f, h * 0.9f)
-            lineTo(w * 0.25f, h * 0.9f)
-            close()
-        }
-        drawPath(
-            path = pathBasket,
-            color = color
-        )
-
+        // Draw a tiny sync indicator inside the cloud (like a revolving circle/dots)
         drawCircle(
-            color = Color.White,
-            radius = 2.dp.toPx(),
-            center = Offset(w * 0.5f, h * 0.7f)
+            color = color.copy(alpha = 0.8f),
+            radius = 1.5.dp.toPx(),
+            center = Offset(w * 0.42f, h * 0.55f)
+        )
+        drawCircle(
+            color = color.copy(alpha = 0.8f),
+            radius = 1.5.dp.toPx(),
+            center = Offset(w * 0.58f, h * 0.55f)
         )
     }
 }

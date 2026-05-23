@@ -6,6 +6,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,19 +14,21 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -47,7 +50,7 @@ fun TelemetryDashboard(
     distanceMeters: Double,
     modifier: Modifier = Modifier
 ) {
-    var activeTab by remember { mutableStateOf(0) } // 0: Harita, 1: Detaylar, 2: Grafikler, 3: Sarf & Log, 4: Ham JSON
+    var activeTab by remember { mutableStateOf(0) } // 0: Radar Harita, 1: Detaylar, 2: Grafikler, 3: Sarf & Log, 4: Ham JSON
 
     Column(
         modifier = modifier
@@ -63,30 +66,55 @@ fun TelemetryDashboard(
             )
             .padding(16.dp)
     ) {
-        // Dashboard Tab Selector (Horizontal Scrollable for KMP compatibility and premium feel)
+        // High-Tech Custom Segmented Scrollable Tab Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(14.dp))
                 .background(Color.White.copy(alpha = 0.04f))
                 .padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             val tabs = listOf("Radar Harita", "Detaylı Veriler", "Grafik Analiz", "Sarf & Günlük", "Ham JSON")
             tabs.forEachIndexed { index, title ->
                 val selected = activeTab == index
-                Button(
-                    onClick = { activeTab = index },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selected) ThemeIndigo else Color.Transparent,
-                        contentColor = if (selected) Color.White else Color.White.copy(alpha = 0.6f)
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
+                
+                // Spring bounce scale on tab click
+                val scale by animateFloatAsState(
+                    targetValue = if (selected) 1.04f else 1.0f,
+                    animationSpec = spring(stiffness = Spring.StiffnessLow),
+                    label = "TabActiveScale"
+                )
+                
+                val tabBg = if (selected) {
+                    Brush.horizontalGradient(listOf(ThemeIndigo, MediumPurple))
+                } else {
+                    Brush.horizontalGradient(listOf(Color.Transparent, Color.Transparent))
+                }
+                
+                Box(
+                    modifier = Modifier
+                        .graphicsLayer {
+                            scaleX = scale
+                            scaleY = scale
+                        }
+                        .background(
+                            brush = tabBg,
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        .border(
+                            width = 0.5.dp,
+                            color = if (selected) Color.White.copy(alpha = 0.15f) else Color.Transparent,
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        .clickable { activeTab = index }
+                        .padding(horizontal = 14.dp, vertical = 9.dp),
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = title,
+                        color = if (selected) Color.White else Color.White.copy(alpha = 0.55f),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1
@@ -111,7 +139,7 @@ fun TelemetryDashboard(
 fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
     val isCleaning = telemetry?.statusCode in listOf(5, 6, 7)
 
-    // Telemetry Mini Metrics Row (Optimized to 3 items to avoid squishing on mobile)
+    // Telemetry Mini Metrics Row
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -281,7 +309,7 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
                 drawPath(
                     path = cleanPath,
                     color = ThemeOrange.copy(alpha = 0.6f),
-                    style = Stroke(width = 3f)
+                    style = Stroke(width = 3f, cap = StrokeCap.Round, join = StrokeJoin.Round)
                 )
 
                 // Draw current robot position (vacuum indicator)
@@ -297,7 +325,7 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
                     radius = 6f
                 )
             } else {
-                // Idle position at dock (center-bottom)
+                // Idle position at dock
                 val dockPos = Offset(center.x, center.y + 110f)
                 drawCircle(
                     color = ThemeBlue.copy(alpha = 0.3f),
@@ -312,7 +340,7 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
             }
         }
 
-        // Overlay status text on Canvas top-left
+        // Overlay status text
         Column(
             modifier = Modifier
                 .align(Alignment.TopStart)
@@ -334,7 +362,6 @@ fun TabMapAndTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
             )
         }
 
-        // Radar coordinate stats at bottom-right
         Text(
             text = "LDS v2.0 // Grid: 0.5m",
             color = Color.White.copy(alpha = 0.3f),
@@ -352,13 +379,11 @@ fun TabDetailedTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        // Active warning/fault card
         val fault = telemetry?.faultCode ?: 0
         if (fault != 0) {
             FaultAlertCard(faultCode = fault)
         }
 
-        // 3x2 Grid of Detailed Metrics Cards
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.fillMaxWidth()
@@ -403,7 +428,7 @@ fun TabDetailedTelemetry(telemetry: VacuumTelemetry?, distanceMeters: Double) {
             }
         }
 
-        // Visual Hardware-like Segment Gauges
+        // Hardware Level Segmented Gauges
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -456,7 +481,7 @@ fun SegmentedBarGauge(label: String, activeSegments: Int, totalSegments: Int, ac
             )
             Text(
                 text = "$activeSegments / $totalSegments",
-                color = Color.White,
+                color = activeColor,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -464,16 +489,18 @@ fun SegmentedBarGauge(label: String, activeSegments: Int, totalSegments: Int, ac
         Spacer(modifier = Modifier.height(6.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             for (i in 1..totalSegments) {
                 val isActive = i <= activeSegments
+                val segmentColor = if (isActive) activeColor else Color.White.copy(alpha = 0.05f)
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(6.dp)
-                        .clip(RoundedCornerShape(3.dp))
-                        .background(if (isActive) activeColor else Color.White.copy(alpha = 0.05f))
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(segmentColor)
+                        .border(0.5.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(4.dp))
                 )
             }
         }
@@ -564,7 +591,7 @@ fun TabCharts(batteryHistory: List<Int>, areaHistory: List<Int>) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(90.dp)
+                    .height(96.dp)
             ) {
                 if (batteryHistory.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -587,8 +614,7 @@ fun TabCharts(batteryHistory: List<Int>, areaHistory: List<Int>) {
                         val fillPath = Path()
 
                         batteryHistory.forEachIndexed { i, bat ->
-                            // Map battery (0..100) to height (h..0)
-                            val pct = bat / 100f
+                            val pct = bat.coerceIn(0, 100) / 100f
                             val cy = h - (pct * h)
                             val cx = i * stepX
 
@@ -607,19 +633,37 @@ fun TabCharts(batteryHistory: List<Int>, areaHistory: List<Int>) {
                             }
                         }
 
-                        // Fill under the line
+                        // Fill under the line with visual gradient
                         drawPath(
                             path = fillPath,
                             brush = Brush.verticalGradient(
-                                colors = listOf(EmeraldGreen.copy(alpha = 0.2f), Color.Transparent)
+                                colors = listOf(EmeraldGreen.copy(alpha = 0.22f), Color.Transparent)
                             )
                         )
-                        // Draw line
+                        // Draw line with rounded joints
                         drawPath(
                             path = linePath,
                             color = EmeraldGreen,
-                            style = Stroke(width = 2.5f)
+                            style = Stroke(width = 2.5f, cap = StrokeCap.Round, join = StrokeJoin.Round)
                         )
+                        
+                        // Draw a glowing point at the last item
+                        if (pointsCount > 0) {
+                            val lastPct = (batteryHistory.lastOrNull() ?: 100) / 100f
+                            val lastCx = (pointsCount - 1) * stepX
+                            val lastCy = h - (lastPct * h)
+                            
+                            drawCircle(
+                                color = EmeraldGreen.copy(alpha = 0.35f),
+                                radius = 6.dp.toPx(),
+                                center = Offset(lastCx, lastCy)
+                            )
+                            drawCircle(
+                                color = Color.White,
+                                radius = 2.5.dp.toPx(),
+                                center = Offset(lastCx, lastCy)
+                            )
+                        }
                     }
                 }
             }
@@ -644,7 +688,7 @@ fun TabCharts(batteryHistory: List<Int>, areaHistory: List<Int>) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(90.dp)
+                    .height(96.dp)
             ) {
                 if (areaHistory.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -656,7 +700,7 @@ fun TabCharts(batteryHistory: List<Int>, areaHistory: List<Int>) {
                         val h = size.height
                         val maxVal = (areaHistory.maxOrNull() ?: 10).coerceAtLeast(10).toFloat()
                         val barCount = areaHistory.size
-                        val barSpacing = 6f
+                        val barSpacing = 8f
                         val barWidth = (w - (barSpacing * (barCount - 1))) / barCount
 
                         areaHistory.forEachIndexed { i, area ->
@@ -664,12 +708,14 @@ fun TabCharts(batteryHistory: List<Int>, areaHistory: List<Int>) {
                             val rx = i * (barWidth + barSpacing)
                             val ry = h - cy
 
-                            drawRect(
+                            // Draw rounded bars at top end
+                            drawRoundRect(
                                 brush = Brush.verticalGradient(
                                     colors = listOf(MediumPurple, ThemeIndigo)
                                 ),
                                 topLeft = Offset(rx, ry),
-                                size = Size(barWidth, cy)
+                                size = Size(barWidth, cy),
+                                cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx())
                             )
                         }
                     }
@@ -698,7 +744,7 @@ fun TabLogsAndConsumables(telemetry: VacuumTelemetry?, eventLog: List<String>) {
                 color = Color.White.copy(alpha = 0.8f),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 10.dp)
+                modifier = Modifier.padding(bottom = 12.dp)
             )
             
             Row(
@@ -794,7 +840,7 @@ fun TabRawJson(telemetry: VacuumTelemetry?) {
                 .fillMaxWidth()
                 .height(280.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(JetBlack) // Darkest gray, terminal background
+                .background(JetBlack) // Terminal jet black
                 .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
                 .padding(12.dp)
         ) {
@@ -815,7 +861,6 @@ fun TabRawJson(telemetry: VacuumTelemetry?) {
                     }
                 }
             } else {
-                // Minify and highlight
                 val formattedJson = remember(rawJson) {
                     formatAndHighlightJson(minifyJson(rawJson))
                 }
@@ -852,7 +897,7 @@ fun ConsumableRing(label: String, pct: Int, color: Color) {
         verticalArrangement = Arrangement.Center
     ) {
         Box(
-            modifier = Modifier.size(50.dp),
+            modifier = Modifier.size(54.dp),
             contentAlignment = Alignment.Center
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
@@ -861,14 +906,14 @@ fun ConsumableRing(label: String, pct: Int, color: Color) {
                     color = Color.White.copy(alpha = 0.05f),
                     style = Stroke(width = 4.dp.toPx())
                 )
-                // Percentage arc
+                // Percentage arc with Rounded Caps
                 val sweepAngle = (pct / 100f) * 360f
                 drawArc(
                     color = if (pct < 20) AlertRed else color,
                     startAngle = -90f,
                     sweepAngle = sweepAngle,
                     useCenter = false,
-                    style = Stroke(width = 4.dp.toPx())
+                    style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
                 )
             }
             Text(
@@ -878,12 +923,12 @@ fun ConsumableRing(label: String, pct: Int, color: Color) {
                 fontWeight = FontWeight.Bold
             )
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = label,
             color = Color.White.copy(alpha = 0.6f),
             fontSize = 9.sp,
-            fontWeight = FontWeight.Normal
+            fontWeight = FontWeight.Medium
         )
     }
 }
@@ -892,10 +937,10 @@ fun ConsumableRing(label: String, pct: Int, color: Color) {
 fun MetricCard(label: String, value: String, icon: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(14.dp))
             .background(Color.White.copy(alpha = 0.04f))
-            .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(12.dp))
-            .padding(10.dp),
+            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
+            .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(icon, fontSize = 16.sp)
@@ -904,14 +949,15 @@ fun MetricCard(label: String, value: String, icon: String, modifier: Modifier = 
             text = label,
             color = Color.White.copy(alpha = 0.5f),
             fontSize = 9.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.5.sp
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = value,
             color = Color.White,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold
+            fontSize = 13.sp,
+            fontWeight = FontWeight.ExtraBold
         )
     }
 }
@@ -951,7 +997,6 @@ fun formatAndHighlightJson(json: String): AnnotatedString {
         while (i < len) {
             val char = json[i]
             
-            // Check for string boundaries
             if (char == '"' && (i == 0 || json[i - 1] != '\\')) {
                 inString = !inString
                 withStyle(style = SpanStyle(color = if (isKey) ElectricCyan else LightGreen)) {
@@ -969,7 +1014,6 @@ fun formatAndHighlightJson(json: String): AnnotatedString {
                 continue
             }
             
-            // Handle whitespaces outside string
             if (char.isWhitespace()) {
                 append(char)
                 i++
@@ -1006,7 +1050,6 @@ fun formatAndHighlightJson(json: String): AnnotatedString {
                     isKey = false
                 }
                 else -> {
-                    // Check if number or boolean or null
                     if (char.isDigit() || char == '-' || char == '.') {
                         var numStr = ""
                         while (i < len && (json[i].isDigit() || json[i] == '.' || json[i] == '-' || json[i] == '+' || json[i] == 'e' || json[i] == 'E')) {

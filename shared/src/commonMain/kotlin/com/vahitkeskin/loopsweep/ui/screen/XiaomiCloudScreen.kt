@@ -3,6 +3,7 @@ package com.vahitkeskin.loopsweep.ui.screen
 import com.vahitkeskin.loopsweep.ui.theme.*
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
@@ -13,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,9 +21,11 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,6 +55,7 @@ fun XiaomiCloudScreen(
     val loginStatus by viewModel.loginStatus.collectAsState()
     
     var regionDropdownExpanded by remember { mutableStateOf(false) }
+    var passwordVisible by remember { mutableStateOf(false) }
     
     val scrollState = rememberScrollState()
 
@@ -252,39 +255,56 @@ fun XiaomiCloudScreen(
 
             // Main Tab View for login modes
             var selectedTab by remember { mutableStateOf(0) }
-            TabRow(
-                selectedTabIndex = selectedTab,
-                containerColor = Color.Transparent,
-                contentColor = Color.White,
-                divider = {},
-                indicator = { tabPositions ->
-                    TabRowDefaults.Indicator(
-                        modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
-                        color = MediumPurple,
-                        height = 3.dp
-                    )
-                },
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White.copy(alpha = 0.03f))
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color.White.copy(alpha = 0.04f))
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Tab(
-                    selected = selectedTab == 0,
-                    onClick = { selectedTab = 0 },
-                    text = { Text("Bulut Girişi", fontWeight = FontWeight.Bold) }
-                )
-                Tab(
-                    selected = selectedTab == 1,
-                    onClick = { selectedTab = 1 },
-                    text = { Text("Token Override", fontWeight = FontWeight.Bold) }
-                )
-                Tab(
-                    selected = selectedTab == 2,
-                    onClick = { selectedTab = 2 },
-                    text = { Text("Manuel Kayıt", fontWeight = FontWeight.Bold) }
-                )
+                val tabs = listOf("Bulut Girişi", "Token Override", "Manuel Kayıt")
+                tabs.forEachIndexed { index, title ->
+                    val selected = selectedTab == index
+                    val scale by animateFloatAsState(
+                        targetValue = if (selected) 1.04f else 1.0f,
+                        animationSpec = spring(stiffness = Spring.StiffnessLow),
+                        label = "CloudTabScale"
+                    )
+                    
+                    val bg = if (selected) {
+                        Brush.horizontalGradient(listOf(ThemeIndigo, MediumPurple))
+                    } else {
+                        Brush.horizontalGradient(listOf(Color.Transparent, Color.Transparent))
+                    }
+                    
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .graphicsLayer {
+                                scaleX = scale
+                                scaleY = scale
+                            }
+                            .background(brush = bg, shape = RoundedCornerShape(10.dp))
+                            .border(
+                                width = 0.5.dp,
+                                color = if (selected) Color.White.copy(alpha = 0.15f) else Color.Transparent,
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                            .clickable { selectedTab = index }
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = title,
+                            color = if (selected) Color.White else Color.White.copy(alpha = 0.55f),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
             }
 
             when (selectedTab) {
@@ -309,33 +329,46 @@ fun XiaomiCloudScreen(
                                 label = { Text("E-posta, Telefon veya Mi ID") },
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = MediumPurple,
-                                    unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
                                     focusedLabelColor = MediumPurple,
-                                    unfocusedLabelColor = Color.Gray,
+                                    unfocusedLabelColor = Color.White.copy(alpha = 0.4f),
                                     focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
+                                    unfocusedTextColor = Color.White,
+                                    focusedContainerColor = Color.White.copy(alpha = 0.02f),
+                                    unfocusedContainerColor = Color.White.copy(alpha = 0.02f)
                                 ),
-                                shape = RoundedCornerShape(10.dp),
+                                shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                             )
 
-                            // Password Input
+                            // Password Input with Visibility Toggle
                             OutlinedTextField(
                                 value = password,
                                 onValueChange = { viewModel.password.value = it },
                                 label = { Text("Şifre") },
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = MediumPurple,
-                                    unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
                                     focusedLabelColor = MediumPurple,
-                                    unfocusedLabelColor = Color.Gray,
+                                    unfocusedLabelColor = Color.White.copy(alpha = 0.4f),
                                     focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
+                                    unfocusedTextColor = Color.White,
+                                    focusedContainerColor = Color.White.copy(alpha = 0.02f),
+                                    unfocusedContainerColor = Color.White.copy(alpha = 0.02f)
                                 ),
-                                shape = RoundedCornerShape(10.dp),
-                                visualTransformation = PasswordVisualTransformation(),
+                                shape = RoundedCornerShape(12.dp),
+                                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                                trailingIcon = {
+                                    Text(
+                                        text = if (passwordVisible) "👁️" else "👁️‍🗨️",
+                                        modifier = Modifier
+                                            .clickable { passwordVisible = !passwordVisible }
+                                            .padding(8.dp),
+                                        fontSize = 14.sp
+                                    )
+                                },
                                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
@@ -355,24 +388,26 @@ fun XiaomiCloudScreen(
                                     label = { Text("Mi Home Sunucu Bölgesi") },
                                     colors = OutlinedTextFieldDefaults.colors(
                                         focusedBorderColor = MediumPurple,
-                                        unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                                        unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
                                         focusedLabelColor = MediumPurple,
-                                        unfocusedLabelColor = Color.Gray,
+                                        unfocusedLabelColor = Color.White.copy(alpha = 0.4f),
                                         focusedTextColor = Color.White,
-                                        unfocusedTextColor = Color.White
+                                        unfocusedTextColor = Color.White,
+                                        focusedContainerColor = Color.White.copy(alpha = 0.02f),
+                                        unfocusedContainerColor = Color.White.copy(alpha = 0.02f)
                                     ),
-                                    shape = RoundedCornerShape(10.dp),
-                                    modifier = Modifier.fillMaxWidth().clickable { regionDropdownExpanded = true },
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier.fillMaxWidth(),
                                     trailingIcon = {
                                         Text(
                                             text = "▼",
                                             color = Color.Gray,
-                                            fontSize = 12.sp,
+                                            fontSize = 11.sp,
                                             modifier = Modifier.padding(end = 8.dp)
                                         )
                                     }
                                 )
-                                // Transparent overlay click catcher since textfield is readOnly
+                                // Transparent overlay click catcher
                                 Box(
                                     modifier = Modifier
                                         .matchParentSize()
@@ -398,17 +433,17 @@ fun XiaomiCloudScreen(
                                 }
                             }
 
-                            // Submit Button
-                            Button(
-                                onClick = { viewModel.loginAndFetchDevices() },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MediumPurple
-                                ),
-                                shape = RoundedCornerShape(10.dp),
+                            // Submit Button (Modern Gradient Style)
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(50.dp),
-                                enabled = !isLoading
+                                    .height(50.dp)
+                                    .background(
+                                        brush = Brush.horizontalGradient(listOf(ThemeIndigo, MediumPurple)),
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    .clickable(enabled = !isLoading) { viewModel.loginAndFetchDevices() },
+                                contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = if (isLoading) "Giriş Yapılıyor..." else "Giriş Yap ve Cihazları Çek",
@@ -446,11 +481,15 @@ fun XiaomiCloudScreen(
                                 label = { Text("Mi Account UserId") },
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = MediumPurple,
-                                    unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                                    focusedLabelColor = MediumPurple,
+                                    unfocusedLabelColor = Color.White.copy(alpha = 0.4f),
                                     focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
+                                    unfocusedTextColor = Color.White,
+                                    focusedContainerColor = Color.White.copy(alpha = 0.02f),
+                                    unfocusedContainerColor = Color.White.copy(alpha = 0.02f)
                                 ),
-                                shape = RoundedCornerShape(10.dp),
+                                shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                                 singleLine = true
                             )
@@ -461,11 +500,15 @@ fun XiaomiCloudScreen(
                                 label = { Text("serviceToken (xiaomiio)") },
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = MediumPurple,
-                                    unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                                    focusedLabelColor = MediumPurple,
+                                    unfocusedLabelColor = Color.White.copy(alpha = 0.4f),
                                     focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
+                                    unfocusedTextColor = Color.White,
+                                    focusedContainerColor = Color.White.copy(alpha = 0.02f),
+                                    unfocusedContainerColor = Color.White.copy(alpha = 0.02f)
                                 ),
-                                shape = RoundedCornerShape(10.dp),
+                                shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                                 singleLine = true
                             )
@@ -476,26 +519,30 @@ fun XiaomiCloudScreen(
                                 label = { Text("ssecurity") },
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = MediumPurple,
-                                    unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                                    focusedLabelColor = MediumPurple,
+                                    unfocusedLabelColor = Color.White.copy(alpha = 0.4f),
                                     focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
+                                    unfocusedTextColor = Color.White,
+                                    focusedContainerColor = Color.White.copy(alpha = 0.02f),
+                                    unfocusedContainerColor = Color.White.copy(alpha = 0.02f)
                                 ),
-                                shape = RoundedCornerShape(10.dp),
+                                shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                                 singleLine = true
                             )
 
-                            // Submit Button
-                            Button(
-                                onClick = { viewModel.fetchDevicesWithManualTokens() },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = EmeraldGreen
-                                ),
-                                shape = RoundedCornerShape(10.dp),
+                            // Submit Button (Green Gradient Style)
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(50.dp),
-                                enabled = !isLoading
+                                    .height(50.dp)
+                                    .background(
+                                        brush = Brush.horizontalGradient(listOf(EmeraldGreen, ThemeCyan)),
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    .clickable(enabled = !isLoading) { viewModel.fetchDevicesWithManualTokens() },
+                                contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = if (isLoading) "Cihazlar Getiriliyor..." else "Tokenlar ile Bağlan ve Çek",
@@ -536,11 +583,15 @@ fun XiaomiCloudScreen(
                                 label = { Text("Robot Yerel IP Adresi") },
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = MediumPurple,
-                                    unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                                    focusedLabelColor = MediumPurple,
+                                    unfocusedLabelColor = Color.White.copy(alpha = 0.4f),
                                     focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
+                                    unfocusedTextColor = Color.White,
+                                    focusedContainerColor = Color.White.copy(alpha = 0.02f),
+                                    unfocusedContainerColor = Color.White.copy(alpha = 0.02f)
                                 ),
-                                shape = RoundedCornerShape(10.dp),
+                                shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                                 singleLine = true,
                                 placeholder = { Text("Örn: 192.168.1.150") }
@@ -552,33 +603,37 @@ fun XiaomiCloudScreen(
                                 label = { Text("32 Karakterli Hex Token") },
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = MediumPurple,
-                                    unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                                    focusedLabelColor = MediumPurple,
+                                    unfocusedLabelColor = Color.White.copy(alpha = 0.4f),
                                     focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
+                                    unfocusedTextColor = Color.White,
+                                    focusedContainerColor = Color.White.copy(alpha = 0.02f),
+                                    unfocusedContainerColor = Color.White.copy(alpha = 0.02f)
                                 ),
-                                shape = RoundedCornerShape(10.dp),
+                                shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                                 singleLine = true,
                                 placeholder = { Text("Örn: 4a526f6b5f546f6b656e5f5f5f5f5f5f") }
                             )
 
-                            // Save Button
-                            Button(
-                                onClick = {
-                                    if (directIp.isBlank() || directToken.length != 32) {
-                                        viewModel.clear()
-                                        // Trigger a temporary UI state showing error
-                                    } else {
-                                        onSaveConnection(directIp.trim(), directToken.trim())
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MediumPurple
-                                ),
-                                shape = RoundedCornerShape(10.dp),
+                            // Save Button (Gradient style)
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(50.dp)
+                                    .background(
+                                        brush = Brush.horizontalGradient(listOf(ThemeIndigo, MediumPurple)),
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    .clickable {
+                                        if (directIp.isBlank() || directToken.length != 32) {
+                                            viewModel.clear()
+                                        } else {
+                                            onSaveConnection(directIp.trim(), directToken.trim())
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = "Doğrudan Bağlantıyı Kaydet",
@@ -601,6 +656,18 @@ fun DeviceRow(
     device: XiaomiDevice,
     onSelect: () -> Unit
 ) {
+    // Pulse animation for online/offline status dot
+    val infiniteTransition = rememberInfiniteTransition()
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "StatusDotPulse"
+    )
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -616,14 +683,14 @@ fun DeviceRow(
                     fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.width(6.dp))
-                // Online/Offline status dot
+                // Online/Offline glowing pulse status dot
+                val dotColor = if (device.isOnline) EmeraldGreen else AlertRed
                 Box(
                     modifier = Modifier
                         .size(8.dp)
-                        .background(
-                            color = if (device.isOnline) EmeraldGreen else AlertRed,
-                            shape = RoundedCornerShape(4.dp)
-                        )
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(dotColor.copy(alpha = pulseAlpha))
+                        .border(0.5.dp, dotColor, RoundedCornerShape(4.dp))
                 )
             }
             Text(
@@ -641,12 +708,12 @@ fun DeviceRow(
         Button(
             onClick = onSelect,
             colors = ButtonDefaults.buttonColors(
-                containerColor = MediumPurple.copy(alpha = 0.2f)
+                containerColor = MediumPurple.copy(alpha = 0.15f)
             ),
-            border = BorderStroke(1.dp, MediumPurple.copy(alpha = 0.6f)),
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.height(32.dp)
+            border = BorderStroke(1.dp, MediumPurple.copy(alpha = 0.5f)),
+            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+            shape = RoundedCornerShape(10.dp),
+            modifier = Modifier.height(34.dp)
         ) {
             Text(
                 text = "Seç",

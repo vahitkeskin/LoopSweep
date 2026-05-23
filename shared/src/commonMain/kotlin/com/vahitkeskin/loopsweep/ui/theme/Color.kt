@@ -65,3 +65,13 @@ val PlankLineColor = Color(0xFFC8B69F)
 // --- Dust Particle Colors ---
 val DustDarkGray = Color(0xFF1A1A1A)
 val DustMediumGray = Color(0xFF2B2B2B)
+
+// --- Premium UI & Glassmorphism Accents ---
+val GlassBorderLight = Color(0x33FFFFFF)
+val GlassBorderDark = Color(0x0FFFFFFF)
+val GlassBgLight = Color(0x0AFFFFFF)
+val GlassBgDark = Color(0x04FFFFFF)
+val GlowPurple = Color(0x808B5CF6)
+val GlowCyan = Color(0x8000E5FF)
+val GlowGreen = Color(0x8010B981)
+val GlowOrange = Color(0x80F59E0B)

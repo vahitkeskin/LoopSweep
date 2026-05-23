@@ -2,6 +2,9 @@ package com.vahitkeskin.loopsweep
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.navigation.compose.NavHost
@@ -198,8 +201,8 @@ class CutoutShape : Shape {
         val path = Path().apply {
             val width = size.width
             val height = size.height
-            val cutoutW = with(density) { 120.dp.toPx() }
-            val cutoutH = with(density) { 36.dp.toPx() }
+            val cutoutW = with(density) { 124.dp.toPx() }
+            val cutoutH = with(density) { 38.dp.toPx() }
             val center = width / 2f
 
             val leftStart = center - cutoutW / 2f
@@ -239,9 +242,9 @@ fun GlassmorphicBottomNavigation(
     onStopClicked: () -> Unit,
     onDockClicked: () -> Unit
 ) {
-    val barHeight = 80.dp
-    val buttonSize = 58.dp
-    val outerHeight = 124.dp
+    val barHeight = 84.dp
+    val buttonSize = 60.dp
+    val outerHeight = 128.dp
 
     Box(
         modifier = Modifier
@@ -249,7 +252,7 @@ fun GlassmorphicBottomNavigation(
             .height(outerHeight),
         contentAlignment = Alignment.BottomCenter
     ) {
-        // 1. Bottom bar - opaque background with CutoutShape, grey line on top profile
+        // 1. Bottom bar - glassmorphic background with CutoutShape, glowing gradient line on top profile
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
@@ -257,16 +260,15 @@ fun GlassmorphicBottomNavigation(
         ) {
             val width = size.width
             val height = size.height
-            val cutoutW = 120.dp.toPx()
-            val cutoutH = 36.dp.toPx()
+            val cutoutW = 124.dp.toPx()
+            val cutoutH = 38.dp.toPx()
             val center = width / 2f
             val leftStart = center - cutoutW / 2f
             val rightEnd = center + cutoutW / 2f
-            val strokeWidth = 1.dp.toPx()
-            val halfStroke = strokeWidth / 2f
+            val strokeWidth = 1.5.dp.toPx()
 
-            // Draw opaque background clipped to CutoutShape
-            val bgPath = androidx.compose.ui.graphics.Path().apply {
+            // Draw translucent glassmorphic background clipped to CutoutShape
+            val bgPath = Path().apply {
                 moveTo(0f, 0f)
                 lineTo(leftStart, 0f)
                 cubicTo(
@@ -286,28 +288,37 @@ fun GlassmorphicBottomNavigation(
             }
             drawPath(
                 path = bgPath,
-                color = SpaceDarkBg
+                color = SpaceDarkBg.copy(alpha = 0.85f)
             )
 
-            // Draw grey line along the top profile of the cutout
-            val topPath = androidx.compose.ui.graphics.Path().apply {
-                moveTo(0f, halfStroke)
-                lineTo(leftStart, halfStroke)
+            // Draw white/glow gradient line along the top profile of the cutout
+            val topPath = Path().apply {
+                moveTo(0f, strokeWidth / 2f)
+                lineTo(leftStart, strokeWidth / 2f)
                 cubicTo(
-                    x1 = leftStart + cutoutW * 0.3f, y1 = halfStroke,
-                    x2 = center - cutoutW * 0.25f, y2 = cutoutH + halfStroke,
-                    x3 = center, y3 = cutoutH + halfStroke
+                    x1 = leftStart + cutoutW * 0.3f, y1 = strokeWidth / 2f,
+                    x2 = center - cutoutW * 0.25f, y2 = cutoutH + strokeWidth / 2f,
+                    x3 = center, y3 = cutoutH + strokeWidth / 2f
                 )
                 cubicTo(
-                    x1 = center + cutoutW * 0.25f, y1 = cutoutH + halfStroke,
-                    x2 = rightEnd - cutoutW * 0.3f, y2 = halfStroke,
-                    x3 = rightEnd, y3 = halfStroke
+                    x1 = center + cutoutW * 0.25f, y1 = cutoutH + strokeWidth / 2f,
+                    x2 = rightEnd - cutoutW * 0.3f, y2 = strokeWidth / 2f,
+                    x3 = rightEnd, y3 = strokeWidth / 2f
                 )
-                lineTo(width, halfStroke)
+                lineTo(width, strokeWidth / 2f)
             }
+            
+            val topBorderBrush = Brush.horizontalGradient(
+                colors = listOf(
+                    Color.White.copy(alpha = 0.02f),
+                    Color.White.copy(alpha = 0.25f),
+                    Color.White.copy(alpha = 0.02f)
+                )
+            )
+            
             drawPath(
                 path = topPath,
-                color = Color.DarkGray,
+                brush = topBorderBrush,
                 style = Stroke(width = strokeWidth)
             )
         }
@@ -329,6 +340,17 @@ fun GlassmorphicBottomNavigation(
                 if (item != null) {
                     val isSelected = currentRoute == item.screen.route
                     val activeColor = if (isSelected) AmberYellow else SystemGray
+                    
+                    // Smooth spring scale animation on selection
+                    val tabScale by animateFloatAsState(
+                        targetValue = if (isSelected) 1.12f else 1.0f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = "TabScaleAnimation"
+                    )
+
                     Column(
                         modifier = Modifier
                             .weight(1f)
@@ -338,22 +360,38 @@ fun GlassmorphicBottomNavigation(
                                 indication = null,
                                 onClick = { onRouteSelected(item.screen.route) }
                             )
-                            .padding(bottom = 12.dp),
+                            .padding(bottom = 10.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Bottom
                     ) {
                         Box(
-                            modifier = Modifier.height(32.dp),
+                            modifier = Modifier
+                                .height(32.dp)
+                                .graphicsLayer {
+                                    scaleX = tabScale
+                                    scaleY = tabScale
+                                },
                             contentAlignment = Alignment.Center
                         ) {
                             item.icon(activeColor)
                         }
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = item.label,
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = activeColor
+                            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold,
+                            color = activeColor,
+                            letterSpacing = 0.5.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        // Active status pill
+                        Box(
+                            modifier = Modifier
+                                .size(width = 12.dp, height = 3.dp)
+                                .background(
+                                    color = if (isSelected) AmberYellow else Color.Transparent,
+                                    shape = RoundedCornerShape(1.5.dp)
+                                )
                         )
                     }
                 } else {
@@ -362,18 +400,20 @@ fun GlassmorphicBottomNavigation(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
-                            .padding(bottom = 12.dp),
+                            .padding(bottom = 10.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Bottom
                     ) {
                         Spacer(modifier = Modifier.height(32.dp))
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Start",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = SystemGray
+                            color = SystemGray,
+                            letterSpacing = 0.5.sp
                         )
+                        Spacer(modifier = Modifier.height(7.dp)) // Equal spacing layout block
                     }
                 }
             }
@@ -381,11 +421,26 @@ fun GlassmorphicBottomNavigation(
 
         // 3. The Robot Vacuum Button - positioned absolutely over the cutout
         var showMenu by remember { mutableStateOf(false) }
+        
+        // Slight bounce scale effect when active
+        val buttonScale by animateFloatAsState(
+            targetValue = if (showMenu) 1.08f else 1.0f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
+            ),
+            label = "ButtonScaleAnimation"
+        )
+
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 16.dp) // Slightly higher padding for visible gap from cutout
+                .padding(top = 14.dp)
                 .size(buttonSize)
+                .graphicsLayer {
+                    scaleX = buttonScale
+                    scaleY = buttonScale
+                }
                 .clickable(
                     interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
                     indication = null,
@@ -394,20 +449,20 @@ fun GlassmorphicBottomNavigation(
             contentAlignment = Alignment.Center
         ) {
             RobotVacuumButtonContent(
-                isCleaning = true,
+                isCleaning = isCleaning,
                 isCharging = isCharging
             )
 
             // Click balloon popup
             val transition = updateTransition(targetState = showMenu, label = "BalloonTransition")
             val alpha by transition.animateFloat(
-                transitionSpec = { tween(durationMillis = 150, easing = LinearOutSlowInEasing) },
+                transitionSpec = { tween(durationMillis = 200, easing = LinearOutSlowInEasing) },
                 label = "alpha"
             ) { state ->
                 if (state) 1f else 0f
             }
             val scale by transition.animateFloat(
-                transitionSpec = { tween(durationMillis = 150, easing = LinearOutSlowInEasing) },
+                transitionSpec = { tween(durationMillis = 200, easing = LinearOutSlowInEasing) },
                 label = "scale"
             ) { state ->
                 if (state) 1f else 0.8f
@@ -441,18 +496,18 @@ fun VacuumControlBalloon(
     onDockClicked: () -> Unit
 ) {
     val arrowHeightDp = 14.dp
-    val balloonColor = DarkNavy
+    val balloonColor = DarkNavy.copy(alpha = 0.96f)
     val borderColor = BlueGray
 
     Popup(
         alignment = Alignment.BottomCenter,
-        offset = IntOffset(0, -(buttonSizePx + with(LocalDensity.current) { 6.dp.roundToPx() })),
+        offset = IntOffset(0, -(buttonSizePx + with(LocalDensity.current) { 8.dp.roundToPx() })),
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true)
     ) {
         Box(
             modifier = Modifier
-                .width(230.dp)
+                .width(236.dp)
                 .wrapContentHeight()
                 .graphicsLayer {
                     this.alpha = alpha
@@ -463,14 +518,14 @@ fun VacuumControlBalloon(
                 .drawBehind {
                     val arrowH = arrowHeightDp.toPx()
                     val bodyH = size.height - arrowH
-                    val cornerR = CornerRadius(14.dp.toPx())
+                    val cornerR = CornerRadius(16.dp.toPx())
                     val cx = size.width / 2f
                     val arrowW = 24.dp.toPx()
 
                     // Drop shadow
                     drawRoundRect(
-                        color = Color.Black.copy(alpha = 0.35f),
-                        topLeft = Offset(3.dp.toPx(), 3.dp.toPx()),
+                        color = Color.Black.copy(alpha = 0.45f),
+                        topLeft = Offset(3.dp.toPx(), 4.dp.toPx()),
                         size = Size(size.width, bodyH),
                         cornerRadius = cornerR
                     )
@@ -485,16 +540,15 @@ fun VacuumControlBalloon(
                         color = borderColor,
                         size = Size(size.width, bodyH),
                         cornerRadius = cornerR,
-                        style = Stroke(width = 1.dp.toPx())
+                        style = Stroke(width = 1.2.dp.toPx())
                     )
-                    // Cover only the portion of the bottom border where the arrow connects,
-                    // so the rest of the bottom border remains visible.
+                    // Cover bottom connection border
                     drawRect(
                         color = balloonColor,
-                        topLeft = Offset(cx - arrowW / 2f, bodyH - 1.dp.toPx()),
-                        size = Size(arrowW, 1.dp.toPx() + 1f)
+                        topLeft = Offset(cx - arrowW / 2f, bodyH - 1.2.dp.toPx()),
+                        size = Size(arrowW, 1.2.dp.toPx() + 1f)
                     )
-                    // Arrow fill (triangle pointing down)
+                    // Arrow fill
                     val arrowFillPath = Path().apply {
                         moveTo(cx - arrowW / 2f, bodyH)
                         lineTo(cx + arrowW / 2f, bodyH)
@@ -502,7 +556,7 @@ fun VacuumControlBalloon(
                         close()
                     }
                     drawPath(arrowFillPath, balloonColor)
-                    // Arrow border (only the two slanted edges — no base line)
+                    // Arrow border
                     val arrowBorderPath = Path().apply {
                         moveTo(cx - arrowW / 2f, bodyH)
                         lineTo(cx, bodyH + arrowH)
@@ -511,23 +565,23 @@ fun VacuumControlBalloon(
                     drawPath(
                         path = arrowBorderPath,
                         color = borderColor,
-                        style = Stroke(width = 1.dp.toPx())
+                        style = Stroke(width = 1.2.dp.toPx())
                     )
                 }
                 .padding(bottom = arrowHeightDp)
-                .padding(10.dp)
+                .padding(12.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 if (isCleaning) {
-                    // ⏹️ Durdur button
+                    // Durdur button (Rose/Red Gradient)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(
                                 brush = Brush.linearGradient(
-                                    colors = listOf(DarkRed, AlertRed)
+                                    colors = listOf(Color(0xFFE11D48), Color(0xFFFB7185))
                                 ),
-                                shape = RoundedCornerShape(10.dp)
+                                shape = RoundedCornerShape(12.dp)
                             )
                             .clickable { onStopClicked() }
                             .padding(vertical = 12.dp),
@@ -541,15 +595,15 @@ fun VacuumControlBalloon(
                         )
                     }
                 } else {
-                    // ▶️ Başlat button
+                    // Başlat button (Emerald Green Gradient)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(
                                 brush = Brush.linearGradient(
-                                    colors = listOf(DeepGreen, EmeraldGreen)
+                                    colors = listOf(Color(0xFF059669), Color(0xFF34D399))
                                 ),
-                                shape = RoundedCornerShape(10.dp)
+                                shape = RoundedCornerShape(12.dp)
                             )
                             .clickable { onCleanClicked() }
                             .padding(vertical = 12.dp),
@@ -563,15 +617,15 @@ fun VacuumControlBalloon(
                         )
                     }
                 }
-                // 🏠 Şarj İstasyonuna Dön button
+                // Şarj İstasyonuna Dön button (Amber Orange Gradient)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
                             brush = Brush.linearGradient(
-                                colors = listOf(DeepOrange, AmberYellow)
+                                colors = listOf(Color(0xFFD97706), Color(0xFFFBBF24))
                             ),
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(12.dp)
                         )
                         .clickable { onDockClicked() }
                         .padding(vertical = 12.dp),
@@ -579,7 +633,7 @@ fun VacuumControlBalloon(
                 ) {
                     Text(
                         text = "🏠  Şarj İstasyonuna Dön",
-                        color = DarkBrown,
+                        color = Color.Black,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp
                     )

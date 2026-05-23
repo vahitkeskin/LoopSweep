@@ -1,5 +1,6 @@
 package com.vahitkeskin.loopsweep.ui.components
 
+import com.vahitkeskin.loopsweep.ui.theme.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,7 +24,8 @@ fun RoomCard(
     room: RoomItem,
     currentRepeats: Int,
     onRoomClick: () -> Unit,
-    onStepperClick: () -> Unit,
+    onIncrementRepeats: () -> Unit,
+    onDecrementRepeats: () -> Unit,
     isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -32,7 +34,7 @@ fun RoomCard(
             .fillMaxWidth()
             .aspectRatio(1f)
             .clip(RoundedCornerShape(24.dp))
-            .background(Color.White.copy(alpha = 0.05f))
+            .background(Color.White.copy(alpha = 0.04f))
             .border(
                 1.dp,
                 Brush.linearGradient(
@@ -48,42 +50,86 @@ fun RoomCard(
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(70.dp)
-                .clip(RoundedCornerShape(35.dp))
+                .size(80.dp)
+                .clip(RoundedCornerShape(40.dp))
                 .background(
                     Brush.radialGradient(
                         colors = listOf(
-                            room.gradientColors[0].copy(alpha = 0.25f),
+                            room.gradientColors.firstOrNull()?.copy(alpha = 0.22f) ?: Color.Transparent,
                             Color.Transparent
                         )
                     )
                 )
         )
         
-        // Repeat Counter Stepper Button (Top-Right)
-        Box(
+        // Interactive Stepper Pill (Top-Right)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(12.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.Black.copy(alpha = 0.4f))
+                .padding(10.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.Black.copy(alpha = 0.5f))
                 .border(
                     0.5.dp,
                     Color.White.copy(alpha = 0.15f),
-                    RoundedCornerShape(12.dp)
+                    RoundedCornerShape(10.dp)
                 )
-                .clickable {
-                    onStepperClick()
-                }
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "🔄 ${currentRepeats}x",
-                color = Color.White,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold
+            // Minus Button
+            Box(
+                modifier = Modifier
+                    .clickable(enabled = currentRepeats > 1) { onDecrementRepeats() }
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "−",
+                    color = if (currentRepeats > 1) Color.White else Color.White.copy(alpha = 0.25f),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            // Divider
+            Box(
+                modifier = Modifier
+                    .width(0.5.dp)
+                    .height(12.dp)
+                    .background(Color.White.copy(alpha = 0.15f))
             )
+            
+            // Text Indicator
+            Text(
+                text = "${currentRepeats}x",
+                color = Color.White,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 6.dp)
+            )
+            
+            // Divider
+            Box(
+                modifier = Modifier
+                    .width(0.5.dp)
+                    .height(12.dp)
+                    .background(Color.White.copy(alpha = 0.15f))
+            )
+            
+            // Plus Button
+            Box(
+                modifier = Modifier
+                    .clickable(enabled = currentRepeats < 3) { onIncrementRepeats() }
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "+",
+                    color = if (currentRepeats < 3) Color.White else Color.White.copy(alpha = 0.25f),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
         
         // Large Room Icon & Name Column
@@ -98,7 +144,7 @@ fun RoomCard(
                 text = room.icon,
                 fontSize = 42.sp
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(6.dp))
         }
         
         // Bottom Translucent Gradient Bar containing Name & Loop details
@@ -108,10 +154,10 @@ fun RoomCard(
                 .fillMaxWidth()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.75f))
+                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
                     )
                 )
-                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .padding(horizontal = 14.dp, vertical = 12.dp)
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth()
@@ -123,27 +169,26 @@ fun RoomCard(
                 ) {
                     Text(
                         text = room.name,
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f).padding(end = 4.dp)
                     )
-                    // Premium glassmorphic badge — different for all-areas vs specific area
+                    
+                    // Compact Room ID / All Area badge
                     val idStr = room.id.toString()
-                    val compactId = if (room.isAllAreas) "🏠 TÜM" else if (idStr.length > 6) "…${idStr.takeLast(6)}" else idStr
+                    val compactId = if (room.isAllAreas) "🏠 TÜM" else if (idStr.length > 5) "…${idStr.takeLast(4)}" else idStr
+                    val badgeColor = room.gradientColors.firstOrNull() ?: MediumPurple
+                    
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(
-                                        room.gradientColors[0].copy(alpha = 0.30f),
-                                        room.gradientColors.last().copy(alpha = 0.15f)
-                                    )
-                                )
-                            )
+                            .background(badgeColor.copy(alpha = 0.15f))
                             .border(
                                 0.5.dp,
-                                room.gradientColors[0].copy(alpha = 0.55f),
+                                badgeColor.copy(alpha = 0.45f),
                                 RoundedCornerShape(8.dp)
                             )
                             .padding(horizontal = 6.dp, vertical = 2.dp),
@@ -151,9 +196,9 @@ fun RoomCard(
                     ) {
                         Text(
                             text = compactId,
-                            fontSize = 10.sp,
+                            fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,
-                            color = room.gradientColors[0].copy(alpha = 0.95f),
+                            color = badgeColor.copy(alpha = 0.95f),
                             maxLines = 1,
                             overflow = TextOverflow.Clip
                         )

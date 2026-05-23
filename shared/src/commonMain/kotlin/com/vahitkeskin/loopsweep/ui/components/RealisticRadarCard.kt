@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -357,25 +358,71 @@ fun RealisticRadarDisplay(
                     // Target Mas Ayak (dx = 0.7, dy = -0.4) represents the primary obstacle target lock
                     if (target.desc == "MASA-AYAK" && blipAlpha > 0.4f) {
                         val lockRatio = (1.0f - blipAlpha) * 15f
+                        val bracketSize = target.size * 2f + lockRatio
+                        
                         drawCircle(
                             color = ThemeCyan.copy(alpha = blipAlpha * 0.7f),
                             center = targetPos,
                             radius = target.size * 1.5f + lockRatio,
                             style = Stroke(width = 1f)
                         )
-                        // Target lock lines
-                        drawLine(
-                            color = ThemeCyan.copy(alpha = blipAlpha),
-                            start = Offset(targetPos.x - 12f, targetPos.y),
-                            end = Offset(targetPos.x + 12f, targetPos.y),
-                            strokeWidth = 1f
-                        )
-                        drawLine(
-                            color = ThemeCyan.copy(alpha = blipAlpha),
-                            start = Offset(targetPos.x, targetPos.y - 12f),
-                            end = Offset(targetPos.x, targetPos.y + 12f),
-                            strokeWidth = 1f
-                        )
+                        
+                        // Tactical Rotating sci-fi corner brackets
+                        rotate(degrees = sweepAngle * 0.7f, pivot = targetPos) {
+                            val lineLen = 6.dp.toPx()
+                            // Top-left
+                            drawLine(
+                                color = ThemeCyan.copy(alpha = blipAlpha),
+                                start = Offset(targetPos.x - bracketSize, targetPos.y - bracketSize),
+                                end = Offset(targetPos.x - bracketSize + lineLen, targetPos.y - bracketSize),
+                                strokeWidth = 1.5.dp.toPx()
+                            )
+                            drawLine(
+                                color = ThemeCyan.copy(alpha = blipAlpha),
+                                start = Offset(targetPos.x - bracketSize, targetPos.y - bracketSize),
+                                end = Offset(targetPos.x - bracketSize, targetPos.y - bracketSize + lineLen),
+                                strokeWidth = 1.5.dp.toPx()
+                            )
+                            // Top-right
+                            drawLine(
+                                color = ThemeCyan.copy(alpha = blipAlpha),
+                                start = Offset(targetPos.x + bracketSize, targetPos.y - bracketSize),
+                                end = Offset(targetPos.x + bracketSize - lineLen, targetPos.y - bracketSize),
+                                strokeWidth = 1.5.dp.toPx()
+                            )
+                            drawLine(
+                                color = ThemeCyan.copy(alpha = blipAlpha),
+                                start = Offset(targetPos.x + bracketSize, targetPos.y - bracketSize),
+                                end = Offset(targetPos.x + bracketSize, targetPos.y - bracketSize + lineLen),
+                                strokeWidth = 1.5.dp.toPx()
+                            )
+                            // Bottom-left
+                            drawLine(
+                                color = ThemeCyan.copy(alpha = blipAlpha),
+                                start = Offset(targetPos.x - bracketSize, targetPos.y + bracketSize),
+                                end = Offset(targetPos.x - bracketSize + lineLen, targetPos.y + bracketSize),
+                                strokeWidth = 1.5.dp.toPx()
+                            )
+                            drawLine(
+                                color = ThemeCyan.copy(alpha = blipAlpha),
+                                start = Offset(targetPos.x - bracketSize, targetPos.y + bracketSize),
+                                end = Offset(targetPos.x - bracketSize, targetPos.y + bracketSize - lineLen),
+                                strokeWidth = 1.5.dp.toPx()
+                            )
+                            // Bottom-right
+                            drawLine(
+                                color = ThemeCyan.copy(alpha = blipAlpha),
+                                start = Offset(targetPos.x + bracketSize, targetPos.y + bracketSize),
+                                end = Offset(targetPos.x + bracketSize - lineLen, targetPos.y + bracketSize),
+                                strokeWidth = 1.5.dp.toPx()
+                            )
+                            drawLine(
+                                color = ThemeCyan.copy(alpha = blipAlpha),
+                                start = Offset(targetPos.x + bracketSize, targetPos.y + bracketSize),
+                                end = Offset(targetPos.x + bracketSize, targetPos.y + bracketSize - lineLen),
+                                strokeWidth = 1.5.dp.toPx()
+                            )
+                        }
                     }
                 }
             }
