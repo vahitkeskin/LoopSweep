@@ -1,4 +1,4 @@
-package com.vahitkeskin.loopsweep.ui.screen
+package com.vahitkeskin.loopsweep.ui.screen.splash
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas

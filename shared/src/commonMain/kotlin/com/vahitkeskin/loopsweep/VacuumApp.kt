@@ -62,9 +62,9 @@ import com.vahitkeskin.loopsweep.di.AppContainer
 import com.vahitkeskin.loopsweep.presentation.VacuumViewModel
 import com.vahitkeskin.loopsweep.presentation.XiaomiCloudViewModel
 import com.vahitkeskin.loopsweep.ui.components.RobotVacuumButtonContent
-import com.vahitkeskin.loopsweep.ui.screen.VacuumScreen
-import com.vahitkeskin.loopsweep.ui.screen.XiaomiCloudScreen
-import com.vahitkeskin.loopsweep.ui.screen.SplashScreen
+import com.vahitkeskin.loopsweep.ui.screen.vacuum.VacuumScreen
+import com.vahitkeskin.loopsweep.ui.screen.cloud.XiaomiCloudScreen
+import com.vahitkeskin.loopsweep.ui.screen.splash.SplashScreen
 import com.vahitkeskin.loopsweep.ui.theme.AlertRed
 import com.vahitkeskin.loopsweep.ui.theme.AmberYellow
 import com.vahitkeskin.loopsweep.ui.theme.BlueGray

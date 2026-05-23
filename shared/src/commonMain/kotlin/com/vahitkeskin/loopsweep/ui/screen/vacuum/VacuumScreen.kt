@@ -1,4 +1,4 @@
-package com.vahitkeskin.loopsweep.ui.screen
+package com.vahitkeskin.loopsweep.ui.screen.vacuum
 
 import com.vahitkeskin.loopsweep.ui.theme.*
 
